@@ -21,9 +21,12 @@ package org.spoutcraft.client.packet.builtin;
 
 import java.io.IOException;
 
-import org.getspout.spoutapi.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
+import org.spoutcraft.client.player.accessories.AccessoryHandler;
+import org.spoutcraft.client.player.accessories.AccessoryType;
 
-public class PacketAccessory implements SpoutPacket{
+public class PacketAccessory extends SpoutPacket{
 	private AccessoryType type;
 	private String url, who;
 	private boolean add;
@@ -59,7 +62,7 @@ public class PacketAccessory implements SpoutPacket{
 	}
 
 	@Override
-	public void handle(int playerId) {
+	public void handle(SpoutPlayer player) {
 		if (add) {
 			AccessoryHandler.addAccessoryType(who, type, url);
 		} else {

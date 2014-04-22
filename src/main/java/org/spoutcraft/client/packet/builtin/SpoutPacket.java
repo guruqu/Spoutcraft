@@ -21,51 +21,38 @@ package org.spoutcraft.client.packet.builtin;
 
 import java.io.IOException;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 
-public interface SpoutPacket {
+public abstract class SpoutPacket {
 	/**
-	 * Reads the data from an input stream into member variables.
-	 * The number of bytes read must be equal to the result of {@link #getNumBytes()}.
-	 * @param input stream to read from
-	 * @throws IOException
+	 * Reads the incoming data from the client. <p> Note: Data should be read in exactly the same order as it was written.
+	 *
+	 * @param buf The byte buffer to read data from
 	 */
-	public void readData(SpoutInputStream input) throws IOException;
+	public abstract void decode(MinecraftExpandableByteBuffer buf) throws IOException;
 
 	/**
-	 * Writes the data from the packet to the output stream, to be serialized and sent to a player.
-	 * The number of bytes written must be equal to the result of {@link #getNumBytes()}.
-	 * @param output stream to write to
-	 * @throws IOException
+	 * Writes the outgoing data to the output stream.
+	 *
+	 * @param buf The buffer to write data to
 	 */
-	public void writeData(SpoutOutputStream output) throws IOException;
+	public abstract void encode(MinecraftExpandableByteBuffer buf) throws IOException;
 
 	/**
 	 * Performs any tasks for the packet after data has been successfully read into the packet.
-	 * @param playerId for the packet
+	 *
+	 * @param player The player of this packet
 	 */
-	public void run(int playerId);
+	public abstract void handle(SpoutPlayer player);
 
 	/**
-	 * Performs any tasks for the packet after the data has NOT been successfully read into the packet.
-	 * All values will be at defaults (0, null, etc) and are unsafe.
-	 * failure is run when the packet versions mismatch and data could not be safely read. It may not be called for all cases of failure.
-	 * @param playerId
+	 * Version of the packet this represents. Version numbers should start with 0. Versions should be incremented any time the member variables or serialization of the packet changes, to prevent
+	 * crashing.
+	 *
+	 * @return version
 	 */
-	public void failure(int playerId);
-
-	/**
-	 * The type of packet represented. Used to rebuild the correct packet on the client.
-	 * @return packet type.
-	 */
-	public PacketType getPacketType();
-
-	/**
-	 * Version of the packet this represents. Version numbers should start with 0.
-	 * Versions should be incremented any time the member variables or serialization of the packet changes, to prevent crashing.
-	 * Mismatched packet versions are discarded, and {@link #failure(int)} is called.
-	 * @return
-	 */
-	public int getVersion();
+	public int getVersion() {
+		return 0;
+	}
 }
