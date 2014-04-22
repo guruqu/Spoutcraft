@@ -36,7 +36,7 @@ import org.spoutcraft.api.material.MaterialData;
 /**
  * Represents a stack of items
  */
-public class ItemStack implements Cloneable{
+public class ItemStack implements Cloneable {
 	private int type;
 	private int amount = 0;
 	private short durability = 0;

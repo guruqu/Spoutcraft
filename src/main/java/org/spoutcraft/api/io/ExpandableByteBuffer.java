@@ -80,6 +80,15 @@ public class ExpandableByteBuffer {
 		buf.put(from);
 	}
 
+	public void putBoolean(boolean b) {
+		expandIfNeeded(1);
+		buf.put(b ? (byte) 1 : 0);
+	}
+
+	public boolean getBoolean() {
+		return buf.get() == 1;
+	}
+
 	public void putChar(char c) {
 		expandIfNeeded(2);
 		buf.putChar(c);
@@ -160,8 +169,103 @@ public class ExpandableByteBuffer {
 		return new UUID(getLong(), getLong());
 	}
 
+	public int[] getInts() {
+		int length = getInt();
+		int[] newArray = new int[length];
+		for (int i = 0; i < length; i++) {
+			newArray[i] = getInt();
+		}
+		return newArray;
+	}
+
+	public void putInts(int[] ints) {
+		putInt(ints.length);
+		for (int i : ints) {
+			putInt(ints[i]);
+		}
+	}
+
+	public float[] getFloats() {
+		int length = getInt();
+		float[] newArray = new float[length];
+		for (int i = 0; i < length; i++) {
+			newArray[i] = getFloat();
+		}
+		return newArray;
+	}
+
+	public void putFloats(float[] floats) {
+		putInt(floats.length);
+		for (float f : floats) {
+			putFloat(f);
+		}
+	}
+
+	public float[][] get2DFloats() throws IOException {
+		final int length = getInt();
+		final int depth = getInt();
+		final float[][] newArray = new float[length][depth];
+		for (int i = 0; i < length; i++) {
+			for (int j = 0; j < depth; j++) {
+				newArray[i][j] = buf.getFloat();
+			}
+		}
+		return newArray;
+	}
+
+	public void put2DFloats(float[][] floats, int depth) throws IOException {
+		putInt(floats.length);
+		putInt(depth);
+		for (float[] aFloat : floats) {
+			for (int j = 0; j < depth; j++) {
+				putFloat(aFloat[j]);
+			}
+		}
+	}
+
 	public ByteBuffer asReadOnlyBuffer() {
 		return buf.asReadOnlyBuffer();
+	}
+
+	public int position() {
+		return buf.position();
+	}
+
+	public ExpandableByteBuffer position(int position) {
+		buf.position(position);
+		return this;
+	}
+
+	public int limit() {
+		return buf.limit();
+	}
+
+	public ExpandableByteBuffer limit(int limit) {
+		buf.limit(limit);
+		return this;
+	}
+
+	public ExpandableByteBuffer flip() {
+		buf.flip();
+		return this;
+	}
+
+	public ExpandableByteBuffer mark() {
+		buf.mark();
+		return this;
+	}
+
+	public ExpandableByteBuffer reset() {
+		buf.reset();
+		return this;
+	}
+
+	public int remaining() {
+		return buf.remaining();
+	}
+
+	public byte[] array() {
+		return buf.array();
 	}
 
 	private void expandIfNeeded(int amount) {
