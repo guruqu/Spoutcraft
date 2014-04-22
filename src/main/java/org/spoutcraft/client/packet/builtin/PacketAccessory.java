@@ -21,65 +21,49 @@ package org.spoutcraft.client.packet.builtin;
 
 import java.io.IOException;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
-import org.spoutcraft.client.packet.PacketType;
-import org.spoutcraft.client.packet.SpoutPacket;
+import org.getspout.spoutapi.io.MinecraftExpandableByteBuffer;
 
 public class PacketAccessory implements SpoutPacket{
 	private AccessoryType type;
 	private String url, who;
 	private boolean add;
 
-	public PacketAccessory() {
+	protected PacketAccessory() {
 	}
 
-	public PacketAccessory(AccessoryType type, String url) {
-		this(type, url, true);
+	public PacketAccessory(String who, AccessoryType type, String url) {
+		this(who, type, url, true);
 	}
 
-	public PacketAccessory(AccessoryType type, String url, boolean add) {
+	public PacketAccessory(String who, AccessoryType type, String url, boolean add) {
+		this.who = who;
 		this.type = type;
 		this.url = url;
 		this.add = add;
 	}
 
 	@Override
-	public void readData(SpoutInputStream input) throws IOException {
-		who = input.readString();
-		type = AccessoryType.get(input.readInt());
-		url = input.readString();
-		add = input.readBoolean();
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		who = buf.getUTF8();
+		type = AccessoryType.get(buf.getInt());
+		url = buf.getUTF8();
+		add = buf.getBoolean();
 	}
 
 	@Override
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeString(who);
-		output.writeInt(type.getId());
-		output.writeString(url);
-		output.writeBoolean(add);
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putUTF8(who);
+		buf.putInt(type.getId());
+		buf.putUTF8(url);
+		buf.putBoolean(add);
 	}
 
 	@Override
-	public void run(int playerId) {
+	public void handle(int playerId) {
 		if (add) {
 			AccessoryHandler.addAccessoryType(who, type, url);
 		} else {
 			AccessoryHandler.removeAccessoryType(who, type);
 		}
-	}
-
-	@Override
-	public void failure(int playerId) {
-	}
-
-	@Override
-	public PacketType getPacketType() {
-		return PacketType.PacketAccessory;
-	}
-
-	@Override
-	public int getVersion() {
-		return 2;
-	}
+	}	
 }
