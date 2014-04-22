@@ -17,61 +17,68 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.getspout.spoutapi.io;
-
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+package org.spoutcraft.api.io;
+import java.nio.ByteBuffer;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import net.minecraft.src.Item;
-import net.minecraft.src.NBTBase;
-import net.minecraft.src.NBTTagCompound;
-import net.minecraft.src.NBTTagEnd;
-//import org.bukkit.Bukkit;
-//import org.bukkit.Location;
-//import org.bukkit.World;
-//import org.bukkit.craftbukkit.v1_6_R3.inventory.CraftItemStack;
-//import org.bukkit.inventory.ItemStack;
-//import org.bukkit.util.Vector;
-import org.getspout.spoutapi.material.Material;
-import org.getspout.spoutapi.material.MaterialData;
+import org.spoutcraft.api.Spoutcraft;
+import org.spoutcraft.api.inventory.ItemStack;
+import org.spoutcraft.api.util.FixedLocation;
+import org.spoutcraft.api.util.FixedVector;
+import org.spoutcraft.api.util.Location;
+import org.spoutcraft.api.util.MutableLocation;
+import org.spoutcraft.api.util.MutableVector;
 
 public class MinecraftExpandableByteBuffer extends ExpandableByteBuffer {
-	public void putLocation(Location loc) {
-		putUUID(loc.getWorld().getUID());
+	public static final byte FLAG_COLORINVALID = 1;
+	public static final byte FLAG_COLOROVERRIDE = 2;
+
+	public MinecraftExpandableByteBuffer() {
+	}
+
+	public MinecraftExpandableByteBuffer(ByteBuffer buf) {
+		super(buf);
+	}
+
+	public MinecraftExpandableByteBuffer(int initialSize) {
+		super(initialSize);
+	}
+
+	public MinecraftExpandableByteBuffer(byte[] data) {
+		super(data);
+	}
+
+	public MinecraftExpandableByteBuffer(byte[] data, int offset, int length) {
+		super(data, offset, length);
+	}
+
+	public void putLocation(FixedLocation loc) {
+		putUUID(Spoutcraft.getWorld().getUID());
 		putDouble(loc.getX());
 		putDouble(loc.getY());
 		putDouble(loc.getZ());
-		putFloat(loc.getPitch());
-		putFloat(loc.getYaw());
+		putDouble(loc.getPitch());
+		putDouble(loc.getYaw());
 	}
 
 	public Location getLocation() {
-		final World world = Bukkit.getWorld(getUUID());
-		if (world == null) {
+		//Client has only one world and the server shouldn't be sending us locations for another world
+		if (getUUID() != Spoutcraft.getWorld().getUID()) {
 			return null;
 		}
 
-		return new Location(world, getDouble(), getDouble(), getDouble(), getFloat(), getFloat());
+		return new MutableLocation(getDouble(), getDouble(), getDouble(), getDouble(), getDouble());
 	}
 
-	public void putVector(Vector vector) {
+	public void putVector(FixedVector vector) {
 		putDouble(vector.getX());
 		putDouble(vector.getY());
 		putDouble(vector.getZ());
 	}
 
-	public Vector getVector() {
-		return new Vector(getDouble(), getDouble(), getDouble());
+	public FixedVector getVector() {
+		return new MutableVector(getDouble(), getDouble(), getDouble());
 	}
 
 	public void putNBTTagCompound(NBTTagCompound compound) throws IOException {
@@ -105,12 +112,10 @@ public class MinecraftExpandableByteBuffer extends ExpandableByteBuffer {
 		if (stack == null) {
 			throw new IOException("Attempt made to send null ItemStack to the client!");
 		}
-		final net.minecraft.server.v1_6_R3.ItemStack nmsStack = CraftItemStack.asNMSCopy(stack);
-		putInt(nmsStack.getItem().id);
-		put((byte) nmsStack.count);
-
-		// TODO: In Bukkit 1.6.4, j is Item.getItemDamage
-		putShort((short) nmsStack.j());
+		putInt(stack.getTypeId());
+		put((byte) stack.getAmount());
+		//TODO Dockter, is this equivalent to the server's getItemDamage?
+		putShort(stack.getDurability());
 
 		// TODO: In Bukkit 1.6.4, n is Item.isDamageable
 		// TODO: In Bukkit 1.6.4, s is Item.getShareTag
@@ -142,11 +147,35 @@ public class MinecraftExpandableByteBuffer extends ExpandableByteBuffer {
 		return MaterialData.getMaterial(getInt(), getShort());
 	}
 
+	public Color getColor() {
+		byte flags = get();
+		int argb = getInt();
+		if ((flags & FLAG_COLORINVALID) > 0) {
+			return Color.ignore();
+		}
+		if ((flags & FLAG_COLOROVERRIDE) > 0) {
+			return Color.remove();
+		}
+		return new Color(argb);
+	}
+
+	public void putColor(Color c) {
+		byte flags = 0x0;
+
+		if (c.getRedF() == -1F) {
+			flags |= FLAG_COLORINVALID;
+		} else if (c.getRedF() == -2F) {
+			flags |= FLAG_COLOROVERRIDE;
+		}
+
+		put(flags);
+		putInt(c.toInt());
+	}
+
 	private byte[] compress(NBTBase base) throws IOException {
 		final ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
-		final DataOutputStream dataoutputstream = new DataOutputStream(new GZIPOutputStream(bytearrayoutputstream));
 
-		try {
+		try (DataOutputStream dataoutputstream = new DataOutputStream(new GZIPOutputStream(bytearrayoutputstream))) {
 			dataoutputstream.writeByte(base.getTypeId());
 			if (base.getTypeId() != 0) {
 				dataoutputstream.writeUTF("");
@@ -165,9 +194,7 @@ public class MinecraftExpandableByteBuffer extends ExpandableByteBuffer {
 	}
 
 	private NBTBase decompress(byte[] compressed) throws IOException {
-		final DataInputStream datainputstream = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new ByteArrayInputStream(compressed))));
-
-		try {
+		try (DataInputStream datainputstream = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new ByteArrayInputStream(compressed))))) {
 			final byte typeId = datainputstream.readByte();
 			if (typeId == 0) {
 				return new NBTTagEnd();
@@ -182,14 +209,8 @@ public class MinecraftExpandableByteBuffer extends ExpandableByteBuffer {
 			nbtLoad.setAccessible(true);
 			nbtLoad.invoke(found, datainputstream, 0);
 			return found;
-		} catch (NoSuchMethodException e) {
+		} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
 			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} finally {
-			datainputstream.close();
 		}
 		return null;
 	}
