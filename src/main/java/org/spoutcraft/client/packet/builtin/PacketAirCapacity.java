@@ -21,45 +21,35 @@ package org.spoutcraft.client.packet.builtin;
 
 import java.io.IOException;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.SpoutClient;
 
 public class PacketAirTime implements SpoutPacket {
 	public int airTime;
 	public int air;
 
-	public PacketAirTime() {
+	protected PacketAirCapacity() {
 	}
 
-	public PacketAirTime(int maxTime, int time) {
+	public PacketAirCapacity(int maxTime, int time) {
 		this.airTime = maxTime;
 		this.air = time;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		this.airTime = input.readInt();
-		this.air = input.readInt();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		this.airTime = buf.getInt();
+		this.air = buf.getInt();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeInt(this.airTime);
-		output.writeInt(this.air);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putInt(this.airTime);
+		buf.putInt(this.air);
 	}
 
-	public void run(int id) {
+	public void handle(int id) {
 		SpoutClient.getInstance().getActivePlayer().setMaximumAir(airTime);
 		SpoutClient.getInstance().getActivePlayer().setRemainingAir(air);
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketAirTime;
-	}
-
-	public int getVersion() {
-		return 0;
-	}
-
-	public void failure(int playerId) {
-	}
+	}	
 }
