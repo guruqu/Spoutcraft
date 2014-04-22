@@ -23,6 +23,7 @@ import java.io.IOException;
 
 import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.SpoutClient;
+import org.spoutcraft.client.player.SpoutPlayer;
 
 public class PacketAirTime implements SpoutPacket {
 	public int airTime;
@@ -48,7 +49,7 @@ public class PacketAirTime implements SpoutPacket {
 		buf.putInt(this.air);
 	}
 
-	public void handle(int id) {
+	public void handle(SpoutPlayer player) {
 		SpoutClient.getInstance().getActivePlayer().setMaximumAir(airTime);
 		SpoutClient.getInstance().getActivePlayer().setRemainingAir(air);
 	}	
