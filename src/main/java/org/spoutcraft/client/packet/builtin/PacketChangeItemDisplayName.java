@@ -42,14 +42,14 @@ public class PacketChangeItemDisplayName implements SpoutPacket {
 
 	@Override
 	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
-		throw new IOException("The server should not receive a PacketChangeItemDisplayName from the client (hack?)!");
+		buf.putInt(id);
+		buf.putShort(data);
+		buf.putUTF8(name);		
 	}
 
 	@Override
 	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
-		buf.putInt(id);
-		buf.putShort(data);
-		buf.putUTF8(name);
+		throw new IOException("The server should not receive a PacketChangeItemDisplayName from the client (hack?)!");
 	}
 
 	public void handle(SpoutPlayer player) {

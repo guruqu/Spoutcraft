@@ -27,7 +27,7 @@ import org.spoutcraft.api.io.SpoutOutputStream;
 import org.spoutcraft.api.player.SkyManager;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketSky implements SpoutPacket {
+public class PacketChangeSkybox implements SpoutPacket {
 	private int cloudY, stars, sunPercent, moonPercent;
 	private Color skyColor, fogColor, cloudColor;
 	String sun = "";
@@ -35,7 +35,7 @@ public class PacketSky implements SpoutPacket {
 	public PacketSky() {
 	}
 
-	public PacketSky(int cloudY, int stars, int sunPercent, int moonPercent, Color skyColor) {
+	public PacketChangeSkybox(int cloudY, int stars, int sunPercent, int moonPercent, Color skyColor) {
 		this.cloudY = cloudY;
 		this.stars = stars;
 		this.sunPercent = sunPercent;
@@ -43,7 +43,7 @@ public class PacketSky implements SpoutPacket {
 		this.skyColor = skyColor.clone();
 	}
 
-	public PacketSky(String sunUrl, String moonUrl) {
+	public PacketChangeSkybox(String sunUrl, String moonUrl) {
 		this.cloudY = 0;
 		this.stars = 0;
 		this.sunPercent = 0;
@@ -52,31 +52,33 @@ public class PacketSky implements SpoutPacket {
 		this.moon = moonUrl;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		cloudY = input.readInt();
-		stars = input.readInt();
-		sunPercent = input.readInt();
-		moonPercent = input.readInt();
-		sun = input.readString();
-		moon = input.readString();
-		skyColor = input.readColor();
-		fogColor = input.readColor();
-		cloudColor = input.readColor();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		cloudY = buf.getInt();
+		stars = buf.getInt();
+		sunPercent = buf.getInt();
+		moonPercent = buf.getInt();
+		sun = buf.getUTF8();
+		moon = buf.getUTF8();
+		skyColor = buf.getColor();
+		fogColor = buf.getColor();
+		cloudColor = buf.getColor();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeInt(cloudY);
-		output.writeInt(stars);
-		output.writeInt(sunPercent);
-		output.writeInt(moonPercent);
-		output.writeString(sun);
-		output.writeString(moon);
-		output.writeColor(skyColor);
-		output.writeColor(fogColor);
-		output.writeColor(cloudColor);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putInt(cloudY);
+		buf.putInt(stars);
+		buf.putInt(sunPercent);
+		buf.putInt(moonPercent);
+		buf.putUTF8(sun);
+		buf.putUTF8(moon);
+		buf.putColor(skyColor);
+		buf.putColor(fogColor);
+		buf.putColor(cloudColor);
 	}
 
-	public void run(int PlayerId) {
+	public void handle(SpoutPlayer player) {
 		if (cloudY != 0) {
 			SpoutClient.getInstance().getSkyManager().setCloudHeight(cloudY);
 		}
@@ -125,16 +127,5 @@ public class PacketSky implements SpoutPacket {
 		} else if (!cloudColor.isInvalid()) {
 			sky.setCloudColor(cloudColor);
 		}
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketSky;
-	}
-
-	public int getVersion() {
-		return 2;
-	}
-
-	public void failure(int playerId) {
 	}
 }
