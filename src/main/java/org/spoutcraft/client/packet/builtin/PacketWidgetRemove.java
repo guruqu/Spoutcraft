@@ -26,12 +26,11 @@ import org.spoutcraft.api.gui.InGameHUD;
 import org.spoutcraft.api.gui.PopupScreen;
 import org.spoutcraft.api.gui.Screen;
 import org.spoutcraft.api.gui.Widget;
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketWidgetRemove implements SpoutPacket {
-	protected UUID screen;
+public class PacketWidgetRemove extends SpoutPacket {	
 	protected UUID widget;
 
 	public PacketWidgetRemove() {
@@ -41,15 +40,15 @@ public class PacketWidgetRemove implements SpoutPacket {
 		this.widget = widget.getId();
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		widget = input.readUUID();
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		widget = buf.getUUID();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeUUID(widget);
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putUUID(widget);
 	}
 
-	public void run(int playerId) {
+	public void handle(SpoutPlayer player) {
 		InGameHUD mainScreen = SpoutClient.getInstance().getActivePlayer().getMainScreen();
 		PopupScreen popup = mainScreen.getActivePopup();
 
@@ -65,16 +64,5 @@ public class PacketWidgetRemove implements SpoutPacket {
 		}
 
 		PacketWidget.allWidgets.remove(widget);
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketWidgetRemove;
-	}
-
-	public int getVersion() {
-		return 1;
-	}
-
-	public void failure(int playerId) {
-	}
+	}	
 }

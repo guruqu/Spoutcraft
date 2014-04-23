@@ -25,30 +25,32 @@ import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketAlert extends SpoutPacket {
-	String message;
-	String title;
-	int itemId;
+public class PacketShowAchievement extends SpoutPacket {
+	private String message;
+	private String title;
+	private int itemId;
 
-	protected PacketAlert() {
+	protected PacketShowAchievement() {
 	}
 
-	public PacketAlert(String title, String message, int itemId) {
+	public PacketShowAchievement(String title, String message, int itemId) {
 		this.title = title;
 		this.message = message;
 		this.itemId = itemId;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		title = input.readString();
-		message = input.readString();
-		itemId = input.readInt();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		title = buf.getUTF8();
+		message = buf.getUTF8();
+		itemId = buf.getInt();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeString(title);
-		output.writeString(message);
-		output.writeInt(itemId);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putUTF8(title);
+		buf.putUTF8(message);
+		buf.putInt(itemId);
 	}
 
 	@Override

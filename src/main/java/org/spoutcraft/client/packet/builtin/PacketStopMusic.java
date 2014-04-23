@@ -21,14 +21,15 @@ package org.spoutcraft.client.packet.builtin;
 
 import java.io.IOException;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketStopMusic implements SpoutPacket {
+public class PacketStopMusic extends SpoutPacket {
 	private boolean resetTimer = false;
 	private int fadeTime = -1;
-	public PacketStopMusic() {
+
+	protected PacketStopMusic() {
 	}
 
 	public PacketStopMusic(boolean resetTimer, int fadeTime) {
@@ -36,21 +37,20 @@ public class PacketStopMusic implements SpoutPacket {
 		this.fadeTime = fadeTime;
 	}
 
-	public int getNumBytes() {
-		return 5;
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		resetTimer = buf.getBoolean();
+		fadeTime = buf.getInt();
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		resetTimer = input.readBoolean();
-		fadeTime = input.readInt();
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putBoolean(resetTimer);
+		buf.putInt(fadeTime);
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeBoolean(resetTimer);
-		output.writeInt(fadeTime);
-	}
-
-	public void run(int PlayerId) {
+	@Override
+	public void handle(SpoutPlayer player) {
 		if (fadeTime == -1) {
 			SpoutClient.getHandle().sndManager.stopMusic();
 		} else {
@@ -59,16 +59,5 @@ public class PacketStopMusic implements SpoutPacket {
 		if (resetTimer) {
 			SpoutClient.getHandle().sndManager.resetTime();
 		}
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketStopMusic;
-	}
-
-	public int getVersion() {
-		return 0;
-	}
-
-	public void failure(int playerId) {
 	}
 }

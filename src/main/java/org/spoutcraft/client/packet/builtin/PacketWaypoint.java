@@ -23,35 +23,54 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;;
 import org.spoutcraft.client.gui.minimap.MinimapConfig;
 import org.spoutcraft.client.gui.minimap.Waypoint;
 
-public class PacketWaypoint implements SpoutPacket {
+public class PacketWaypoint extends SpoutPacket {
 	private double x, y, z;
 	private String name;
 	private boolean death = false;
 
-	public PacketWaypoint() { }
-
-	public void readData(SpoutInputStream input) throws IOException { 
-		x = input.readDouble();
-		y = input.readDouble();
-		z = input.readDouble();
-		name = input.readString();
-		death = input.readBoolean();
+	protected PacketWaypoint() {
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeDouble(x);
-		output.writeDouble(y);
-		output.writeDouble(z);
-		output.writeString(name);
-		output.writeBoolean(death);
+	public PacketWaypoint(double x, double y, double z, String name) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.name = name;
 	}
 
-	public void run(int playerId) {
+	public PacketWaypoint(double x, double y, double z, String name, boolean death) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.name = name;
+		this.death = death;
+	}
+
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		x = buf.getDouble();
+		y = buf.getDouble();
+		z = buf.getDouble();
+		name = buf.getUTF8();
+		death = buf.getBoolean();
+	}
+
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putDouble(x);
+		buf.putDouble(y);
+		buf.putDouble(z);
+		buf.putUTF8(name);
+		buf.putBoolean(death);
+	}
+
+	@Override
+	public void handle(SpoutPlayer player) {
 		if (!death) {
 			MinimapConfig.getInstance().addServerWaypoint(x, y, z, name);
 		} else {
@@ -59,16 +78,5 @@ public class PacketWaypoint implements SpoutPacket {
 			point.deathpoint = true;
 			MinimapConfig.getInstance().addWaypoint(point);
 		}
-	}
-
-	public void failure(int playerId) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketWaypoint;
-	}
-
-	public int getVersion() {
-		return 0;
-	}
+	}	
 }

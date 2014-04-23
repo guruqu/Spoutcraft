@@ -31,30 +31,16 @@ import org.spoutcraft.api.gui.PopupScreen;
 import org.spoutcraft.api.gui.Screen;
 import org.spoutcraft.api.gui.Widget;
 import org.spoutcraft.api.gui.WidgetType;
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.gui.CustomScreen;
 
-public class PacketWidget implements SpoutPacket {
-	private Widget widget;
+public class PacketWidget extends SpoutPacket {
+	protected Widget widget;
 	protected UUID screen;
-	private static final int[] nags;
-	ByteBuffer widgetData;
-	WidgetType widgetType;
-	private int version;
-	private UUID widgetId;
 
-	static HashMap<UUID, Widget> allWidgets = new HashMap<UUID, Widget>();
-
-	static {
-		nags = new int[WidgetType.getNumWidgetTypes()];
-		for (int i = 0; i < WidgetType.getNumWidgetTypes(); i++) {
-			nags[i] = CustomPacket.NAG_MSG_AMT;
-		}
-	}
-
-	public PacketWidget() {
+	protected PacketWidget() {
 	}
 
 	public PacketWidget(Widget widget, UUID screen) {
@@ -62,53 +48,41 @@ public class PacketWidget implements SpoutPacket {
 		this.screen = screen;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		int id = input.readInt();
-		screen = input.readUUID();
-		widgetId = input.readUUID();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		final int id = buf.getInt();
+		screen = buf.getUUID();
 
-		int size = input.readInt();
-		version = input.readShort();
-		byte[] widgetData = new byte[size];
-		input.read(widgetData);
-		this.widgetData = ByteBuffer.wrap(widgetData);
-		widgetType = WidgetType.getWidgetFromId(id);
-
-		/*SpoutInputStream data = new SpoutInputStream(ByteBuffer.wrap(widgetData));
+		final WidgetType widgetType = WidgetType.getWidgetFromId(id);
 		if (widgetType != null) {
 			try {
 				widget = widgetType.getWidgetClass().newInstance();
-				if (widget.getVersion() == version) {
-					widget.readData(data);
-				} else {
-					if (nags[id]-- > 0) {
-						System.out.println("Received invalid widget: " + widgetType.getWidgetClass().getSimpleName() + " v: " + version + " current v: " + widget.getVersion());
-					}
-					widget = null;
+				if (widget.getVersion() == buf.getInt()) {
+					final byte[] data = new byte[buf.getInt()];
+					buf.get(data);
+					widget.decode(new MinecraftExpandableByteBuffer(data));
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}*/
+		}
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeInt(widget.getType().getId());
-		output.writeUUID(widget.getScreen().getId());
-		output.writeUUID(widget.getId());
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putInt(widget.getType().getId());
+		buf.putUUID(screen);
+		buf.putUUID(widget.getId());
+		buf.putShort((short) widget.getVersion());
 
-		SpoutOutputStream data = new SpoutOutputStream();
-		widget.writeData(data);
-		ByteBuffer buffer = data.getRawBuffer();
-		byte[] widgetData = new byte[buffer.capacity() - buffer.remaining()];
-		System.arraycopy(buffer.array(), 0, widgetData, 0, widgetData.length);
-
-		output.writeInt(widgetData.length);
-		output.writeShort((short) widget.getVersion());
-		output.write(widgetData);
+		buf.mark();
+		widget.encode(buf);
+		buf.reset();
+		buf.putInt(buf.remaining());
 	}
 
-	public void run(int playerId) {
+	@Override
+	public void handle(SpoutPlayer player) {
 		try {
 			if (allWidgets.containsKey(widgetId)) {
 				widget = allWidgets.get(widgetId);
@@ -186,16 +160,5 @@ public class PacketWidget implements SpoutPacket {
 				}
 			}
 		}
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketWidget;
-	}
-
-	public int getVersion() {
-		return 2;
-	}
-
-	public void failure(int playerId) {
 	}
 }

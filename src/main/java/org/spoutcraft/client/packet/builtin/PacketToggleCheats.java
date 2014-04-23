@@ -25,7 +25,7 @@ import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.player.SpoutPlayer;
 
-public class PacketToggleCheats implements SpoutPacket {
+public class PacketToggleCheats extends SpoutPacket {
 	private boolean cheatsky = false;
 	private boolean forcesky = false;
 	private boolean showsky = false;
@@ -73,32 +73,33 @@ public class PacketToggleCheats implements SpoutPacket {
 
 	@Override
 	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
-		throw new IOException("The server should not receive a PacketToggleCheats from the client (hack?)!");
+		cheatsky = buf.getBoolean();
+		forcesky = buf.getBoolean();
+		showsky = buf.getBoolean();
+		cheatclearwater = buf.getBoolean();
+		forceclearwater = buf.getBoolean();
+		showclearwater = buf.getBoolean();
+		cheatstars = buf.getBoolean();
+		forcestars = buf.getBoolean();
+		showstars = buf.getBoolean();
+		cheatweather = buf.getBoolean();
+		forceweather = buf.getBoolean();
+		showweather = buf.getBoolean();
+		time = buf.getBoolean();
+		coords = buf.getBoolean();
+		entitylabel = buf.getBoolean();
+		cheatvoidfog = buf.getBoolean();
+		forcevoidfog = buf.getBoolean();
+		showvoidfog = buf.getBoolean();
+		flightspeed = buf.getBoolean();		
 	}
 
 	@Override
 	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
-		buf.putBoolean(cheatsky);
-		buf.putBoolean(forcesky);
-		buf.putBoolean(showsky);
-		buf.putBoolean(cheatclearwater);
-		buf.putBoolean(forceclearwater);
-		buf.putBoolean(showclearwater);
-		buf.putBoolean(cheatstars);
-		buf.putBoolean(forcestars);
-		buf.putBoolean(showstars);
-		buf.putBoolean(cheatweather);
-		buf.putBoolean(forceweather);
-		buf.putBoolean(showweather);
-		buf.putBoolean(time);
-		buf.putBoolean(coords);
-		buf.putBoolean(entitylabel);
-		buf.putBoolean(cheatvoidfog);
-		buf.putBoolean(forcevoidfog);
-		buf.putBoolean(showvoidfog);
-		buf.putBoolean(flightspeed);
+		throw new IOException("The client should not send a PacketToggleCheats from the client (hack?)!");
 	}
 
+	@Override
 	public void handle(SpoutPlayer player) {
 		SpoutClient.getInstance().setVisualCheats(cheatsky, forcesky, showsky, cheatclearwater, forceclearwater, showclearwater, cheatstars, forcestars, showstars, cheatweather, forceweather, showweather, time, coords, entitylabel, cheatvoidfog, forcevoidfog, showvoidfog, flyspeed);
 	}	
