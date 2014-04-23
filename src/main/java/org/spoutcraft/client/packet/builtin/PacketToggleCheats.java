@@ -25,7 +25,7 @@ import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.player.SpoutPlayer;
 
-public class PacketAllowVisualCheats implements SpoutPacket {
+public class PacketToggleCheats implements SpoutPacket {
 	private boolean cheatsky = false;
 	private boolean forcesky = false;
 	private boolean showsky = false;

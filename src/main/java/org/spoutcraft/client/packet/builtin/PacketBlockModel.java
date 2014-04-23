@@ -27,43 +27,46 @@ import org.spoutcraft.api.io.SpoutOutputStream;
 import org.spoutcraft.api.material.CustomBlock;
 import org.spoutcraft.api.material.MaterialData;
 
-public class PacketCustomBlockDesign implements SpoutPacket {
+public class PacketBlockModel implements SpoutPacket {
 	private short customId;
 	private byte data;
 	private GenericBlockDesign design;
 
-	public PacketCustomBlockDesign() {
+	protected PacketBlockModel() {
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		customId = input.readShort();
-		data = (byte) input.read();
+	public PacketBlockModel(short customId, BlockDesign design, byte data) {
+		this.design = design;
+		this.customId = customId;
+		this.data = data;
+	}
+
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		customId = buf.getShort();
+		data = buf.get();
 		design = new GenericBlockDesign();
-		design.read(input);
-		if (design.isReset()) {
+		design.decode(buf);
+		if (design.getReset()) {
 			design = null;
 		}
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeShort(customId);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putShort(customId);
+		buf.put(data);
+		if (design != null) {
+			design.encode(buf);
+		} else {
+			buf.putUTF8(GenericBlockDesign.RESET_STRING);
+		}
 	}
 
-	public void run(int id) {
+	public void handle(SpoutPlayer player) {
 		CustomBlock block = MaterialData.getCustomBlock(customId);
 		if (block != null) {
 			block.setBlockDesign(design, data);
 		}
-	}
-
-	public void failure(int id) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketCustomBlockDesign;
-	}
-
-	public int getVersion() {
-		return new GenericBlockDesign().getVersion() + 3;
-	}
+	}	
 }
