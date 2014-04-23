@@ -26,30 +26,38 @@ import net.minecraft.src.TileEntity;
 import net.minecraft.src.TileEntitySign;
 import net.minecraft.src.World;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketOpenSignGUI implements SpoutPacket {
-	int x,y,z;
+public class PacketOpenSignGUI extends SpoutPacket {
+	private int x, y, z;
 
-	public int getNumBytes() {
-		return 12; // Never be too lazy to calculate !
+	protected PacketOpenSignGUI() {
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		x = input.readInt();
-		y = input.readInt();
-		z = input.readInt();
+	public PacketOpenSignGUI(int x, int y, int z) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeInt(x);
-		output.writeInt(y);
-		output.writeInt(z);
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		x = buf.getInt();
+		y = buf.getInt();
+		z = buf.getInt();
 	}
 
-	public void run(int playerId) {
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putInt(x);
+		buf.putInt(y);
+		buf.putInt(z);
+	}
+	
+	@Override
+	public void handle(SpoutPlayer player) {
 		World world = SpoutClient.getHandle().theWorld;
 		TileEntity te = world.getBlockTileEntity(x, y, z);
 		if (te != null && te instanceof TileEntitySign) {
@@ -57,16 +65,5 @@ public class PacketOpenSignGUI implements SpoutPacket {
 			GuiEditSign gui = new GuiEditSign(sign);
 			SpoutClient.getHandle().displayGuiScreen(gui);
 		}
-	}
-
-	public void failure(int playerId) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketOpenSignGUI;
-	}
-
-	public int getVersion() {
-		return 0;
 	}
 }

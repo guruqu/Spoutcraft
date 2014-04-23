@@ -23,59 +23,50 @@ import java.io.IOException;
 
 import net.minecraft.src.Minecraft;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 
-public class PacketMovementModifiers implements SpoutPacket {
+public class PacketMovementModifiers extends SpoutPacket {
 	double gravityMod = 1;
 	double walkingMod = 1;
 	double swimmingMod = 1;
 	double jumpingMod = 1;
 	double airspeedMod = 1;
 
-	public PacketMovementModifiers() {
+	protected PacketMovementModifiers() {
 	}
 
 	public PacketMovementModifiers(double gravity, double walking, double swimming, double jumping, double airspeed) {
-		this.gravityMod = gravity;
-		this.walkingMod = walking;
-		this.swimmingMod = swimming;
-		this.jumpingMod = jumping;
-		this.airspeedMod = airspeed;
+		gravityMod = gravity;
+		walkingMod = walking;
+		swimmingMod = swimming;
+		jumpingMod = jumping;
+		airspeedMod = airspeed;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		gravityMod = input.readDouble();
-		walkingMod = input.readDouble();
-		swimmingMod = input.readDouble();
-		jumpingMod = input.readDouble();
-		airspeedMod = input.readDouble();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		gravityMod = buf.getDouble();
+		walkingMod = buf.getDouble();
+		swimmingMod = buf.getDouble();
+		jumpingMod = buf.getDouble();
+		airspeedMod = buf.getDouble();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeDouble(gravityMod);
-		output.writeDouble(walkingMod);
-		output.writeDouble(swimmingMod);
-		output.writeDouble(jumpingMod);
-		output.writeDouble(airspeedMod);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putDouble(gravityMod);
+		buf.putDouble(walkingMod);
+		buf.putDouble(swimmingMod);
+		buf.putDouble(jumpingMod);
+		buf.putDouble(airspeedMod);
 	}
 
-	public void run(int playerId) {		
+	public void handle(SpoutPlayer player) {		
 		Minecraft.getMinecraft().thePlayer.getData().setGravityMod(gravityMod);
 		Minecraft.getMinecraft().thePlayer.getData().setWalkingMod(walkingMod);
 		Minecraft.getMinecraft().thePlayer.getData().setSwimmingMod(swimmingMod);
 		Minecraft.getMinecraft().thePlayer.getData().setJumpingMod(jumpingMod);
 		Minecraft.getMinecraft().thePlayer.getData().setAirspeedMod(airspeedMod);
-	}
-
-	public void failure(int playerId) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketMovementModifiers;
-	}
-
-	public int getVersion() {
-		return 2;
 	}
 }

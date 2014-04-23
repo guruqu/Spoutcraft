@@ -24,15 +24,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketPermissionUpdate implements SpoutPacket {
-private Map<String, Boolean> permissions;
+public class PacketPermissionUpdate extends SpoutPacket {
+	private Map<String, Boolean> permissions;
 
-	public PacketPermissionUpdate() {
-		permissions = new HashMap<String, Boolean>();
+	protected PacketPermissionUpdate() {
 	}
 
 	public PacketPermissionUpdate(Map<String, Boolean> permissions) {
@@ -40,41 +39,22 @@ private Map<String, Boolean> permissions;
 	}
 
 	@Override
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeInt(permissions.size());
-		for (Entry<String, Boolean> perm:permissions.entrySet()) {
-			output.writeString(perm.getKey());
-			output.writeBoolean(perm.getValue());
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+	}
+
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putInt(permissions.size());
+		for (Entry<String, Boolean> perm : permissions.entrySet()) {
+			buf.putUTF8(perm.getKey());
+			buf.putBoolean(perm.getValue());
 		}
 	}
 
 	@Override
-	public void readData(SpoutInputStream input) throws IOException {
-		int num = input.readInt();
-		for (int i = 0; i < num; i++) {
-			String perm = input.readString();
-			boolean allowed = input.readBoolean();
-			permissions.put(perm, allowed);
-		}
-	}
-
-	@Override
-	public PacketType getPacketType() {
-		return PacketType.PacketPermissionUpdate;
-	}
-
-	@Override
-	public int getVersion() {
-		return 0;
-	}
-
-	@Override
-	public void run(int playerId) {
+	public void handle(SpoutPlayer player) {
 		for (Entry<String, Boolean> perm:permissions.entrySet()) {
 			SpoutClient.getInstance().setPermission(perm.getKey(), perm.getValue());
 		}
 	}
-
-	@Override
-	public void failure(int playerId) {}
 }

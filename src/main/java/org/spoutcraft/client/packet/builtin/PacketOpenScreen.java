@@ -22,35 +22,29 @@ package org.spoutcraft.client.packet.builtin;
 import java.io.IOException;
 
 import org.spoutcraft.api.gui.ScreenType;
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.gui.ScreenUtil;
 
-public class PacketOpenScreen implements SpoutPacket {
+public class PacketOpenScreen extends SpoutPacket {
 	ScreenType type = null;
-	public PacketOpenScreen() {
+
+	public PacketOpenScreen(ScreenType type) {
+		this.type = type;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		type = ScreenType.getType(input.readInt());
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		type = ScreenType.getType(buf.getInt());
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeInt(type.getCode());
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putInt(type.getCode());
 	}
-
-	public void run(int playerId) {
+	
+	@Override
+	public void handle(SpoutPlayer player) {
 		ScreenUtil.open(type);
-	}
-
-	public void failure(int playerId) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketOpenScreen;
-	}
-
-	public int getVersion() {
-		return 0;
 	}
 }

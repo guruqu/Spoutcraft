@@ -21,14 +21,15 @@ package org.spoutcraft.client.packet.builtin;
 
 import java.io.IOException;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketNotification extends PacketAlert {
-	protected int time;
-	protected short data;
-	public PacketNotification() {
+public class PacketNotification extends PacketShowAchievement {
+	private int time;
+	private short data;
+
+	protected PacketNotification() {
 	}
 
 	public PacketNotification(String title, String message, int itemId, short data, int time) {
@@ -37,27 +38,22 @@ public class PacketNotification extends PacketAlert {
 		this.data = data;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		super.readData(input);
-		this.data = input.readShort();
-		this.time = input.readInt();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		super.decode(buf);
+		this.data = buf.getShort();
+		this.time = buf.getInt();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		super.writeData(output);
-		output.writeShort(data);
-		output.writeInt(time);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		super.encode(buf);
+		buf.putShort(data);
+		buf.putInt(time);
 	}
 
-	public PacketType getPacketType() {
-		return PacketType.PacketNotification;
-	}
-
-	public void run(int PlayerId) {
+	@Override
+	public void handle(SpoutPlayer player) {
 		SpoutClient.getInstance().getActivePlayer().showAchievement(title, message, itemId, data, time);
-	}
-
-	public int getVersion() {
-		return 0;
-	}
+	}	
 }

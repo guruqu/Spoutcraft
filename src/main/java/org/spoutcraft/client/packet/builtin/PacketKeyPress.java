@@ -24,8 +24,8 @@ import java.io.IOException;
 import net.minecraft.src.MovementInputFromOptions;
 
 import org.spoutcraft.api.gui.ScreenType;
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 
 public class PacketKeyPress extends SpoutPacket {
 	public boolean pressDown;

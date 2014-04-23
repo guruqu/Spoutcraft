@@ -25,38 +25,47 @@ import java.util.Random;
 import net.minecraft.src.Minecraft;
 import net.minecraft.src.EntityFX;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.api.util.Location;
 import org.spoutcraft.api.util.Vector;
 
-public class PacketParticle implements SpoutPacket {
+public class PacketParticle extends SpoutPacket {
 	String name;
 	Location location;
 	Vector motion;
 	float scale, gravity, particleRed, particleBlue, particleGreen;
 	int maxAge, amount;
 
-	@Override
-	public void readData(SpoutInputStream input) throws IOException {
-		name = input.readString();
-		location = input.readLocation();
-		motion = input.readVector();
-		scale = input.readFloat();
-		gravity = input.readFloat();
-		particleRed = input.readFloat();
-		particleBlue = input.readFloat();
-		particleGreen = input.readFloat();
-		maxAge = input.readInt();
-		amount = Math.min(1000, input.readInt());
+	protected PacketParticle() {
+	}
+
+	public PacketParticle(Particle particle) {
+		this.particle = particle;
 	}
 
 	@Override
-	public void writeData(SpoutOutputStream output) throws IOException {
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		name = buf.getUTF8();
+		location = buf.getLocation();
+		motion = buf.getVector();
+		scale = buf.getFloat();
+		gravity = buf.getFloat();
+		particleRed = buf.getFloat();
+		particleBlue = buf.getFloat();
+		particleGreen = buf.getFloat();
+		maxAge = buf.getInt();
+		amount = Math.min(1000, buf.getInt());
 	}
 
 	@Override
-	public void run(int playerId) {
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		throw new IOException("The client should not send a PacketDownloadFile from the client (hack?)!");
+	}
+
+
+	@Override
+	public void handle(SpoutPlayer player) {
 		Random r = new Random();
 		for (int i = 0; i < amount; i++) {
 			double x = location.getX();
@@ -86,19 +95,5 @@ public class PacketParticle implements SpoutPacket {
 				particle.particleMaxAge = maxAge;
 			}
 		}
-	}
-
-	@Override
-	public void failure(int playerId) {
-	}
-
-	@Override
-	public PacketType getPacketType() {
-		return PacketType.PacketParticle;
-	}
-
-	@Override
-	public int getVersion() {
-		return 0;
 	}
 }
