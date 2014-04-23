@@ -24,8 +24,8 @@ import java.io.IOException;
 import net.minecraft.src.GameSettings;
 import net.minecraft.src.Minecraft;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.api.player.RenderDistance;
 import org.spoutcraft.client.SpoutClient;
 

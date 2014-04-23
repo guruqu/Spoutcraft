@@ -21,40 +21,29 @@ package org.spoutcraft.client.packet.builtin;
 
 import java.io.IOException;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 
 public class PacketClipboardText implements SpoutPacket {
-	protected String text;
-	public PacketClipboardText() {
+	private String text;
+	
+	protected PacketClipboardText() {
 	}
 
 	public PacketClipboardText(String text) {
 		this.text = text;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		text = input.readString();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		text = buf.getUTF8();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		if (text.length() > Short.MAX_VALUE) {
-			text = text.substring(0, Short.MAX_VALUE - 1);
-		}
-		output.writeString(text);
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putUTF8(text);
 	}
 
-	public void run(int playerId) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketClipboardText;
-	}
-
-	public int getVersion() {
-		return 0;
-	}
-
-	public void failure(int playerId) {
+	public void handle(SpoutPlayer player) {
+		// Possibility of setting client side clipboard via GuiScreen.setClipboard(text).
 	}
 }

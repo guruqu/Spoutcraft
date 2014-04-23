@@ -22,8 +22,8 @@ package org.spoutcraft.client.packet.builtin;
 import java.io.IOException;
 
 import org.spoutcraft.api.gui.Color;
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.api.player.SkyManager;
 import org.spoutcraft.client.SpoutClient;
 
