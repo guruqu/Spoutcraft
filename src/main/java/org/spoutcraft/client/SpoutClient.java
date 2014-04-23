@@ -63,6 +63,7 @@ import org.spoutcraft.client.io.FileDownloadThread;
 import org.spoutcraft.client.io.FileUtil;
 import org.spoutcraft.client.io.DownloadAssets;
 import org.spoutcraft.client.packet.CustomPacket;
+import org.spoutcraft.client.packet.CustomPacketPipeline;
 import org.spoutcraft.client.packet.PacketEntityInformation;
 import org.spoutcraft.client.packet.PacketManager;
 import org.spoutcraft.client.player.ClientPlayer;
@@ -76,7 +77,7 @@ public class SpoutClient extends PropertyObject implements Client {
 	public static final String spoutcraftVersion = "1.6.4";
 	public static final String spoutcraftBuild = " - b13";
 	private final SimpleSkyManager skyManager = new SimpleSkyManager();
-	private final PacketManager packetManager = new PacketManager();
+	private final CustomPacketPipeline pipeline = new CustomPacketPipeline(this);
 	private final BiomeManager biomeManager = new SimpleBiomeManager();
 	private final MaterialManager materialManager = new SimpleMaterialManager();
 	private final RenderDelegate render = new MCRenderDelegate();
@@ -181,9 +182,7 @@ public class SpoutClient extends PropertyObject implements Client {
 		return skyManager;
 	}
 
-	public PacketManager getPacketManager() {
-		return packetManager;
-	}
+	public CustomPacketPipeline getPipeline() { return pipeline; }
 
 	public ClientPlayer getActivePlayer() {
 		return player;

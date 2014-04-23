@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.spoutcraft.client.packet;
+package org.spoutcraft.client.packet.builtin;
 
-public interface CompressablePacket extends SpoutPacket {
-	public void compress();
+public abstract class CompressiblePacket extends SpoutPacket {
+	public abstract void compress();
 
-	public void decompress();
+	public abstract void decompress();
 
-	public boolean isCompressed();
+	public abstract boolean isCompressed();
 }
