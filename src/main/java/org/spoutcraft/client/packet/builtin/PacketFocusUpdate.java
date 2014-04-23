@@ -26,8 +26,8 @@ import org.spoutcraft.api.gui.Control;
 import org.spoutcraft.api.gui.InGameHUD;
 import org.spoutcraft.api.gui.PopupScreen;
 import org.spoutcraft.api.gui.Widget;
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
 public class PacketFocusUpdate implements SpoutPacket {
@@ -43,17 +43,19 @@ public class PacketFocusUpdate implements SpoutPacket {
 		this.focus = focus;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		widgetId = new UUID(input.readLong(), input.readLong());
-		focus = input.readBoolean();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		widgetId = buf.getUUID();
+		focus = buf.getBoolean();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeLong(control.getId().getMostSignificantBits());
-		output.writeLong(control.getId().getLeastSignificantBits());
-		output.writeBoolean(focus);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putUUID(control.getId());
+		buf.putBoolean(focus);
 	}
 
+	@Override
 	public void run(int playerId) {
 		InGameHUD screen = SpoutClient.getInstance().getActivePlayer().getMainScreen();
 		PopupScreen popup = screen.getActivePopup();
@@ -63,15 +65,5 @@ public class PacketFocusUpdate implements SpoutPacket {
 				((Control)w).setFocus(focus);
 			}
 		}
-	}
-
-	public void failure(int playerId) {}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketFocusUpdate;
-	}
-
-	public int getVersion() {
-		return 0;
 	}
 }

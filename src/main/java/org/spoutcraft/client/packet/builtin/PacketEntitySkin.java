@@ -23,8 +23,8 @@ import java.io.IOException;
 
 import org.spoutcraft.api.Spoutcraft;
 import org.spoutcraft.api.entity.EntitySkinType;
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.entity.CraftEntity;
 
 public class PacketEntitySkin implements SpoutPacket {
@@ -32,19 +32,31 @@ public class PacketEntitySkin implements SpoutPacket {
 	protected int entityId;
 	protected byte textureId = 0;
 
-	public void readData(SpoutInputStream input) throws IOException {
-		entityId = input.readInt();
-		textureId = (byte) input.read();
-		texture = input.readString();
+	protected PacketEntitySkin() {
+	}
+	
+	public PacketEntitySkin(Entity entity, String texture, byte type) {
+		this.entityId = entity.getEntityId();
+		this.texture = texture;
+		this.textureId = type;
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeInt(entityId);
-		output.write(textureId);
-		output.writeString(texture);
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		entityId = buf.getInt();
+		textureId = buf.get();
+		texture = buf.getUTF8();
 	}
 
-	public void run(int PlayerId) {
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putInt(entityId);
+		buf.put(textureId);
+		buf.putUTF8(texture);
+	}
+
+	@Override
+	public void handle(SpoutPlayer player) {
 		if (texture.equals("[reset]")) {
 			texture = null;
 		}
@@ -52,16 +64,5 @@ public class PacketEntitySkin implements SpoutPacket {
 		if (entity != null) {
 			entity.setSkin(texture, EntitySkinType.getType(textureId));
 		}
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketEntitySkin;
-	}
-
-	public int getVersion() {
-		return 1;
-	}
-
-	public void failure(int playerId) {
-	}
+	}	
 }

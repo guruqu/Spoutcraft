@@ -25,34 +25,38 @@ import net.minecraft.src.Entity;
 import net.minecraft.src.EntityLivingBase;
 import net.minecraft.src.EntityPlayer;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.SpoutcraftWorld;
 import org.spoutcraft.client.entity.CraftLivingEntity;
 
-public class PacketEntityTitle implements SpoutPacket {
+public class PacketEntityNameplate implements SpoutPacket {
 	public String title;
 	public int entityId;
-	public PacketEntityTitle() {
+
+	protected PacketEntityTitle() {
 	}
 
-	public PacketEntityTitle(int entityId, String title) {
+	public PacketEntityNameplate(int entityId, String title) {
 		this.entityId = entityId;
 		this.title = title;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		entityId = input.readInt();
-		title = input.readString();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		entityId = buf.getInt();
+		title = buf.getUTF8();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeInt(entityId);
-		output.writeString(title);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putInt(entityId);
+		buf.putUTF8(title);
 	}
 
-	public void run(int id) {
+	@Override
+	public void handle(SpoutPlayer player) {
 		Entity e = SpoutClient.getInstance().getEntityFromId(entityId);
 		if (e != null && e instanceof EntityLivingBase) {
 			CraftLivingEntity living = (CraftLivingEntity)e.spoutEnty;
@@ -73,16 +77,5 @@ public class PacketEntityTitle implements SpoutPacket {
 				spworld.getHandle().customTitles.put(living.getEntityId(), title);
 			}
 		}
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketEntityTitle;
-	}
-
-	public int getVersion() {
-		return 0;
-	}
-
-	public void failure(int playerId) {
 	}
 }

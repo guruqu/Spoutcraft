@@ -22,8 +22,8 @@ package org.spoutcraft.client.packet.builtin;
 import java.io.IOException;
 import java.util.UUID;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.api.keyboard.KeyBinding;
 import org.spoutcraft.client.SpoutClient;
 
@@ -35,7 +35,7 @@ public class PacketKeyBinding implements SpoutPacket {
 	private boolean pressed;
 	private UUID uniqueId;
 
-	public PacketKeyBinding() {
+	protected PacketKeyBinding() {
 	}
 
 	public PacketKeyBinding(KeyBinding binding, int key, boolean pressed, int screen) {
@@ -44,34 +44,25 @@ public class PacketKeyBinding implements SpoutPacket {
 		this.uniqueId = binding.getUniqueId();
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		id = input.readString();
-		description = input.readString();
-		plugin = input.readString();
-		key = input.readInt();
-		uniqueId = new UUID(input.readLong(), input.readLong());
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		id = buf.getInt();
+		description = buf.getUTF8();
+		plugin = buf.getUTF8();
+		key = buf.getInt();
+        uniqueId = buf.getUUID();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeInt(key);
-		output.writeBoolean(pressed);
-		output.writeLong(uniqueId.getMostSignificantBits());
-		output.writeLong(uniqueId.getLeastSignificantBits());
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putInt(key);
+		buf.putBoolean(pressed);
+		buf.putUUID(uniqueId);
 	}
 
-	public void run(int playerId) {
+	public void handle(SpoutPlayer player) {
 		KeyBinding binding = new KeyBinding(key, plugin, id, description);
 		binding.setUniqueId(uniqueId);
 		SpoutClient.getInstance().getKeyBindingManager().registerControl(binding);
-	}
-
-	public void failure(int playerId) {}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketKeyBinding;
-	}
-
-	public int getVersion() {
-		return 0;
 	}
 }

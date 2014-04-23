@@ -21,37 +21,31 @@ package org.spoutcraft.client.packet.builtin;
 
 import java.io.IOException;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 
 public class PacketFullVersion implements SpoutPacket {
 	private String version;
 
-	public PacketFullVersion() {
+	protected PacketFullVersion() {
 	}
 
 	public PacketFullVersion(String versionString) {
-		version = versionString;
+		this.versionString = versionString;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		versionString = buf.getUTF8();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeString(version);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putUTF8(versionString);
 	}
 
-	public void run(int playerId) {
-	}
-
-	public void failure(int playerId) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketFullVersion;
-	}
-
-	public int getVersion() {
-		return 0;
+	@Override
+	public void handle(SpoutPlayer player) {
+		// Nothing to do.
 	}
 }
