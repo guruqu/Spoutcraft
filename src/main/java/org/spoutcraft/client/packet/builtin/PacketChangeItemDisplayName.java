@@ -21,37 +21,38 @@ package org.spoutcraft.client.packet.builtin;
 
 import java.io.IOException;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.api.material.Material;
 import org.spoutcraft.api.material.MaterialData;
 
-public class PacketItemName implements SpoutPacket {
+public class PacketChangeItemDisplayName implements SpoutPacket {
 	private int id;
 	private short data;
 	private String name;
-	public PacketItemName() {
+
+	protected PacketChangeItemDisplayName() {
 	}
 
-	public PacketItemName(int id, short data, String name) {
+	public PacketChangeItemDisplayName(int id, short data, String name) {
 		this.id = id;
 		this.data = data;
 		this.name = name;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		id = input.readInt();
-		data = input.readShort();
-		name = input.readString();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		throw new IOException("The server should not receive a PacketChangeItemDisplayName from the client (hack?)!");
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeInt(id);
-		output.writeShort(data);
-		output.writeString(name);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putInt(id);
+		buf.putShort(data);
+		buf.putUTF8(name);
 	}
 
-	public void run(int PlayerId) {
+	public void handle(SpoutPlayer player) {
 		Material material = MaterialData.getOrCreateMaterial(id, data);
 		if (material == null) {
 			material = MaterialData.getCustomItem(data);
@@ -66,18 +67,8 @@ public class PacketItemName implements SpoutPacket {
 				material.setName(name);
 			}
 		} else {
+			// Debug Client Code
 			//System.out.println("Tried to set item name to [" + name + "] for unknown material (" + id + ", " + data + ")");
 		}
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketItemName;
-	}
-
-	public int getVersion() {
-		return 0;
-	}
-
-	public void failure(int playerId) {
 	}
 }
