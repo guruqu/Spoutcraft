@@ -21,44 +21,27 @@ package org.spoutcraft.client.packet.builtin;
 
 import java.io.IOException;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 
-public class PacketRequestPrecache implements SpoutPacket {
+public class PacketRequestPrecache extends SpoutPacket {
 	private String plugin;
 
-	public PacketRequestPrecache() {
-	}
-
-	public PacketRequestPrecache(String plugin) {
-		this.plugin = plugin;
+	protected PacketRequestPrecache() {
 	}
 
 	@Override
-	public void readData(SpoutInputStream input) throws IOException {
-		plugin = input.readString();
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		plugin = buf.getUTF8();
 	}
 
 	@Override
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeString(plugin);
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putUTF8(plugin);
 	}
 
 	@Override
-	public void run(int playerId) {
-	}
-
-	@Override
-	public void failure(int playerId) {
-	}
-
-	@Override
-	public PacketType getPacketType() {
-		return PacketType.PacketRequestPrecache;
-	}
-
-	@Override
-	public int getVersion() {
-		return 0;
-	}
+	public void handle(SpoutPlayer player) {
+		// Nothing to do.
+	}	
 }

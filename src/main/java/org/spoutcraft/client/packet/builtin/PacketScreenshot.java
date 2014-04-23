@@ -27,11 +27,11 @@ import javax.imageio.ImageIO;
 import net.minecraft.src.Minecraft;
 import net.minecraft.src.ScreenShotHelper;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketScreenshot implements SpoutPacket {
+public class PacketScreenshot extends SpoutPacket {
 	byte[] ssAsPng = null;
 	boolean isRequest = false;
 
@@ -54,26 +54,28 @@ public class PacketScreenshot implements SpoutPacket {
 		return ssAsPng.length + 5;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		isRequest = input.readBoolean();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		isRequest = buf.getBoolean();
 		if (!isRequest) {
-			int ssLen = input.readInt();
+			int ssLen = buf.getInt();
 			ssAsPng = new byte[ssLen];
-			input.read(ssAsPng);
+			buf.get(ssAsPng);
 		}
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
 		if (ssAsPng == null) {
-			output.writeBoolean(true);
+			buf.putBoolean(true);
 		} else {
-			output.writeBoolean(false);
-			output.writeInt(ssAsPng.length);
-			output.write(ssAsPng);
+			buf.putBoolean(false);
+			buf.putInt(ssAsPng.length);
+			buf.put(ssAsPng);
 		}
 	}
 
-	public void run(int playerId) {
+	public void handle(SpoutPlayer player) {
 		if (!isRequest) {
 			return; // we can't do anything!
 		}
@@ -86,16 +88,5 @@ public class PacketScreenshot implements SpoutPacket {
 			ioe.printStackTrace();
 			SpoutClient.getInstance().getActivePlayer().showAchievement("Sending screenshot...", "Failed!", 321);
 		}
-	}
-
-	public void failure(int playerId) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketScreenshot;
-	}
-
-	public int getVersion() {
-		return 1;
 	}
 }

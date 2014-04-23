@@ -24,80 +24,88 @@ import java.io.IOException;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.SoundManager;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.api.sound.Music;
 import org.spoutcraft.api.sound.SoundEffect;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketPlaySound implements SpoutPacket {
-	short soundId;
-	boolean location = false;
-	int x, y, z;
-	int volume, distance;
+public class PacketPlaySound extends SpoutPacket {
+	private short soundId;
+	private boolean location = false;
+	private int x, y, z;
+	private int volume, distance;
 
-	public PacketPlaySound() {
+	protected PacketPlaySound() {
 	}
 
-	public int getNumBytes() {
-		return 23;
+	public PacketPlaySound(SoundEffect sound, int distance, int volume) {
+		soundId = (short) sound.getId();
+		this.volume = volume;
+		this.distance = distance;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		soundId = input.readShort();
-		location = input.readBoolean();
-		x = input.readInt();
-		y = input.readInt();
-		z = input.readInt();
-		distance = input.readInt();
-		volume = input.readInt();
+	public PacketPlaySound(SoundEffect sound, Location loc, int distance, int volume) {
+		soundId = (short) sound.getId();
+		location = true;
+		x = loc.getBlockX();
+		y = loc.getBlockY();
+		z = loc.getBlockZ();
+		this.volume = volume;
+		this.distance = distance;
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeShort(soundId);
-		output.writeBoolean(location);
+	public PacketPlaySound(Music music, int volume) {
+		soundId = (short) (music.getId() + (1 + SoundEffect.getMaxId()));
+		this.volume = volume;
+	}
+
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		soundId = buf.getShort();
+		location = buf.getBoolean();
+		x = buf.getInt();
+		y = buf.getInt();
+		z = buf.getInt();
+		distance = buf.getInt();
+		volume = buf.getInt();
+	}
+
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putShort(soundId);
+		buf.putBoolean(location);
 		if (!location) {
-			output.writeInt(-1);
-			output.writeInt(-1);
-			output.writeInt(-1);
-			output.writeInt(-1);
+			buf.putInt(-1);
+			buf.putInt(-1);
+			buf.putInt(-1);
+			buf.putInt(-1);
 		} else {
-			output.writeInt(x);
-			output.writeInt(y);
-			output.writeInt(z);
-			output.writeInt(distance);
+			buf.putInt(x);
+			buf.putInt(y);
+			buf.putInt(z);
+			buf.putInt(distance);
 		}
-		output.writeInt(volume);
+		buf.putInt(volume);
 	}
 
-	public void run(int entityId) {
+	public void handle(SpoutPlayer player) {
 		EntityPlayer e = SpoutClient.getInstance().getPlayerFromId(entityId);
 		if (e != null) {
-				SoundManager sndManager = SpoutClient.getHandle().sndManager;
-				if (soundId > -1 && soundId <= SoundEffect.getMaxId()) {
-					SoundEffect effect = SoundEffect.getSoundEffectFromId(soundId);
-					if (!location) {
-						sndManager.playSoundFX(effect.getName(), 0.5F, 0.7F, effect.getVariationId(), volume / 100F);
-					} else {
-						sndManager.playSound(effect.getName(), x, y, z, 0.5F, (distance / 16F), effect.getVariationId(), volume / 100F);
-					}
+			SoundManager sndManager = SpoutClient.getHandle().sndManager;
+			if (soundId > -1 && soundId <= SoundEffect.getMaxId()) {
+				SoundEffect effect = SoundEffect.getSoundEffectFromId(soundId);
+				if (!location) {
+					sndManager.playSoundFX(effect.getName(), 0.5F, 0.7F, effect.getVariationId(), volume / 100F);
+				} else {
+					sndManager.playSound(effect.getName(), x, y, z, 0.5F, (distance / 16F), effect.getVariationId(), volume / 100F);
 				}
-				soundId -= (1 + SoundEffect.getMaxId());
-				if (soundId > -1 && soundId <= Music.getMaxId()) {
-					Music music = Music.getMusicFromId(soundId);
-					sndManager.playMusic(music.getName(), music.getSoundId(), volume / 100F);
-				}
+			}
+			soundId -= (1 + SoundEffect.getMaxId());
+			if (soundId > -1 && soundId <= Music.getMaxId()) {
+				Music music = Music.getMusicFromId(soundId);
+				sndManager.playMusic(music.getName(), music.getSoundId(), volume / 100F);
+			}
 		}
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketPlaySound;
-	}
-
-	public int getVersion() {
-		return 0;
-	}
-
-	public void failure(int playerId) {
 	}
 }

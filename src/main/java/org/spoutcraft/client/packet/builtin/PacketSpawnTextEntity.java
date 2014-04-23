@@ -23,47 +23,39 @@ import java.io.IOException;
 
 import net.minecraft.src.Minecraft;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.entity.EntityText;
 
-public class PacketSpawnTextEntity implements SpoutPacket {
+public class PacketSpawnTextEntity extends SpoutPacket {
 	private String text;
 	private double posX, posY, posZ, moveX, moveY, moveZ;
 	private int duration;
 	private float scale;
 
-	public PacketSpawnTextEntity() {
+	protected PacketSpawnTextEntity() {
 	}
 
 	@Override
-	public void readData(SpoutInputStream input) throws IOException {
-		text = input.readString();
-		posX = input.readDouble();
-		posY = input.readDouble();
-		posZ = input.readDouble();
-		scale = input.readFloat();
-		duration = input.readInt();
-		moveX = input.readDouble();
-		moveY = input.readDouble();
-		moveZ = input.readDouble();
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		text = buf.getUTF8();
+		posX = buf.getDouble();
+		posY = buf.getDouble();
+		posZ = buf.getDouble();
+		scale = buf.getFloat();
+		duration = buf.getInt();
+		moveX = buf.getDouble();
+		moveY = buf.getDouble();
+		moveZ = buf.getDouble();
 	}
 
 	@Override
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeString(text);
-		output.writeDouble(posX);
-		output.writeDouble(posY);
-		output.writeDouble(posZ);
-		output.writeFloat(scale);
-		output.writeInt(duration);
-		output.writeDouble(moveX);
-		output.writeDouble(moveY);
-		output.writeDouble(moveZ);
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		throw new IOException("The client cant spawn text entities (hack?)!");
 	}
 
 	@Override
-	public void run(int playerId) {
+	public void handle(SpoutPlayer player) {
 		EntityText entity = new EntityText(Minecraft.getMinecraft().theWorld);
 		entity.setPosition(posX, posY, posZ);
 		entity.setScale(scale);
@@ -74,19 +66,5 @@ public class PacketSpawnTextEntity implements SpoutPacket {
 		entity.motionZ = moveZ;
 		entity.setDuration(duration);
 		Minecraft.getMinecraft().theWorld.spawnEntityInWorld(entity);
-	}
-
-	@Override
-	public void failure(int playerId) {
-	}
-
-	@Override
-	public PacketType getPacketType() {
-		return PacketType.PacketSpawnTextEntity;
-	}
-
-	@Override
-	public int getVersion() {
-		return 0;
 	}
 }

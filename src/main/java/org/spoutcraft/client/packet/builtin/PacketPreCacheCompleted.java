@@ -23,29 +23,27 @@ import java.io.IOException;
 
 import net.minecraft.src.GuiYesNo;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.gui.CustomScreen;
 import org.spoutcraft.client.gui.precache.GuiPrecache;
 import org.spoutcraft.client.io.FileDownloadThread;
 
-public class PacketPreCacheCompleted implements SpoutPacket {
+public class PacketPreCacheCompleted extends SpoutPacket {
 	public PacketPreCacheCompleted() {
 		System.out.println("[Spoutcraft Cache Manager] Completed: " + System.currentTimeMillis());
 	}
 
-	public int getNumBytes() {
-		return 0;
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-	}
-
-	public void run(int playerId) {
+	public void handle(SpoutPlayer player) {
 		FileDownloadThread.preCacheCompleted.set(System.currentTimeMillis());
 		SpoutClient.getInstance().getPacketManager().sendSpoutPacket(this);
 		if (!(SpoutClient.getHandle().currentScreen instanceof CustomScreen) && !(SpoutClient.getHandle().currentScreen instanceof GuiYesNo)) {
@@ -60,16 +58,5 @@ public class PacketPreCacheCompleted implements SpoutPacket {
 			// Prevent closing a plugin created menu from opening the downloading terrain
 			SpoutClient.getHandle().clearPreviousScreen();
 		}
-	}
-
-	public void failure(int playerId) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketPreCacheCompleted;
-	}
-
-	public int getVersion() {
-		return 0;
 	}
 }

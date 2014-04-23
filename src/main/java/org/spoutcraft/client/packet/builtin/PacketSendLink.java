@@ -22,56 +22,36 @@ package org.spoutcraft.client.packet.builtin;
 import net.minecraft.src.Minecraft;
 import net.minecraft.src.GuiConfirmOpenLink;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 
 import java.io.IOException;
 import java.net.URL;
 
 
-public class PacketSendLink implements SpoutPacket {
-    protected URL link;
+public class PacketSendLink extends SpoutPacket {
+	protected URL link;
 
-    public PacketSendLink() {
-        link = null;
-    }
+	public PacketSendLink() {
+		link = null;
+	}
 
-    @Override
-    public void readData(SpoutInputStream input) throws IOException {
-        link = new URL(input.readString());
-    }
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		link = buf.getUTF8();		
+	}
 
-    @Override
-    public void writeData(SpoutOutputStream output) throws IOException {
-        throw new IOException("The client may not send a link to the server!");
-    }
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		throw new IOException("The client cannot send a link from the server!");
+	}
 
-    @Override
-    public void run(int playerId) {
-    	if (link != null) {
+	@Override
+	public void handle(SpoutPlayer player) {
+		if (link != null) {
 			try {
 				Minecraft.getMinecraft().displayGuiScreen(new GuiConfirmOpenLink(Minecraft.getMinecraft().currentScreen, link.toString(), 0, false));
 			} catch (Exception e) { }
 		}
-    }
-
-    @Override
-    public void failure(int playerId) {
-
-    }
-
-    @Override
-    public PacketType getPacketType() {
-        return PacketType.PacketSendLink;
-    }
-
-    @Override
-    public int getVersion() {
-        return 0;
-    }
-
-    @Override
-    public String toString() {
-        return "PacketSendLink{ version= " + getVersion() + ", link= " + (link == null ? "null" : link.toString()) + " }";
-    }
+	}
 }

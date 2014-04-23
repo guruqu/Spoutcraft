@@ -23,17 +23,17 @@ import java.io.IOException;
 
 import net.minecraft.src.Entity;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketSetVelocity implements SpoutPacket {
+public class PacketSetVelocity extends SpoutPacket {
 	private double motX = 0;
 	private double motY = 0;
 	private double motZ = 0;
 	private int entityId = 0;
 
-	public PacketSetVelocity() {
+	protected PacketSetVelocity() {
 	}
 
 	public PacketSetVelocity(int entityId, double motX, double motY, double motZ) {
@@ -43,41 +43,29 @@ public class PacketSetVelocity implements SpoutPacket {
 		this.motZ = motZ;
 	}
 
-	public int getNumBytes() {
-		return 28;
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		entityId = buf.getInt();
+		motX = buf.getDouble();
+		motY = buf.getDouble();
+		motZ = buf.getDouble();
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		entityId = input.readInt();
-		motX = input.readDouble();
-		motY = input.readDouble();
-		motZ = input.readDouble();
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putInt(entityId);
+		buf.putDouble(motX);
+		buf.putDouble(motY);
+		buf.putDouble(motZ);
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeInt(entityId);
-		output.writeDouble(motX);
-		output.writeDouble(motY);
-		output.writeDouble(motZ);
-	}
-
-	public void run(int playerId) {
+	@Override	
+	public void handle(SpoutPlayer player) {
 		Entity e = SpoutClient.getInstance().getEntityFromId(entityId);
 		if (e != null && !Double.isNaN(motX) && !Double.isNaN(motY) && !Double.isNaN(motZ)) {
 			e.motionX = motX;
 			e.motionY = motY;
 			e.motionZ = motZ;
 		}
-	}
-
-	public void failure(int playerId) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketSetVelocity;
-	}
-
-	public int getVersion() {
-		return 1;
 	}
 }

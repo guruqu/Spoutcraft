@@ -22,58 +22,46 @@ package org.spoutcraft.client.packet.builtin;
 import java.io.IOException;
 
 import org.spoutcraft.api.gui.ScreenType;
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketScreenAction implements SpoutPacket {
+public class PacketScreenAction extends SpoutPacket {
 	protected byte action = -1;
 	protected byte screen = -1; // UnknownScreen
 
-	public PacketScreenAction() {
+	protected PacketScreenAction() {
 	}
 
 	public PacketScreenAction(ScreenAction action, ScreenType screen) {
- 		this.action = (byte)action.getId();
+		this.action = (byte)action.getId();
 		this.screen = (byte)screen.getCode();
 	}
 
-	public int getNumBytes() {
-		return 2;
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		action = buf.get();
+		screen = buf.get();
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		action = (byte) input.read();
-		screen = (byte) input.read();
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.put(action);
+		buf.put(screen);
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.write(action);
-		output.write(screen);
-	}
-
-	public void run(int playerId) {
+	@Override
+	public void handle(SpoutPlayer player) {
 		switch(ScreenAction.getScreenActionFromId(action)) {
-			case Open:
-				SpoutClient.getHandle().displayPreviousScreen();
-				break;
-			case Close:
-				SpoutClient.getHandle().displayPreviousScreen();
-				break;
-			case Force_Close:
-				SpoutClient.getHandle().displayGuiScreen(null, false);
-				break;
+		case Open:
+			SpoutClient.getHandle().displayPreviousScreen();
+			break;
+		case Close:
+			SpoutClient.getHandle().displayPreviousScreen();
+			break;
+		case Force_Close:
+			SpoutClient.getHandle().displayGuiScreen(null, false);
+			break;
 		}
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketScreenAction;
-	}
-
-	public int getVersion() {
-		return 2;
-	}
-
-	public void failure(int playerId) {
 	}
 }

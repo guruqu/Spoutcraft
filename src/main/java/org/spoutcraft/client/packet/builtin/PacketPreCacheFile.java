@@ -22,8 +22,8 @@ package org.spoutcraft.client.packet.builtin;
 import java.io.File;
 import java.io.IOException;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.io.CRCManager;
 import org.spoutcraft.client.io.CustomTextureManager;
@@ -31,8 +31,7 @@ import org.spoutcraft.client.io.Download;
 import org.spoutcraft.client.io.FileDownloadThread;
 import org.spoutcraft.client.io.FileUtil;
 
-public class PacketPreCacheFile implements SpoutPacket {
-	private static byte[] downloadBuffer = new byte[16384];
+public class PacketPreCacheFile extends SpoutPacket {	
 	private boolean cached = false;
 	private boolean url = false;
 	private long expectedCRC;
@@ -49,23 +48,26 @@ public class PacketPreCacheFile implements SpoutPacket {
 		this.url = url;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		this.cached = input.readBoolean();
-		this.url = input.readBoolean();
-		this.expectedCRC = input.readLong();
-		this.file = input.readString();
-		this.plugin = input.readString();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		cached = buf.getBoolean();
+		url = buf.getBoolean();
+		expectedCRC = buf.getLong();
+		file = buf.getUTF8();
+		plugin = buf.getUTF8();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeBoolean(this.cached);
-		output.writeBoolean(this.url);
-		output.writeLong(this.expectedCRC);
-		output.writeString(this.file);
-		output.writeString(this.plugin);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putBoolean(this.cached);
+		buf.putBoolean(this.url);
+		buf.putLong(this.expectedCRC);
+		buf.putUTF8(this.file);
+		buf.putUTF8(this.plugin);
 	}
 
-	public void run(int playerId) {
+	@Override
+	public void handle(SpoutPlayer player) {
 		if (!FileUtil.canCache(file)) {
 			System.out.println("WARNING, " + plugin + " tried to cache an invalid file type: " + file);
 			return;
@@ -110,16 +112,5 @@ public class PacketPreCacheFile implements SpoutPacket {
 				CustomTextureManager.getTextureFromUrl(plugin, fileName);
 			}
 		}
-	}
-
-	public void failure(int playerId) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketPreCacheFile;
-	}
-
-	public int getVersion() {
-		return 0;
-	}
+	}	
 }

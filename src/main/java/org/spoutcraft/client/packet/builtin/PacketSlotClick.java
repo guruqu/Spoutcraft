@@ -23,16 +23,16 @@ import java.io.IOException;
 import java.util.UUID;
 
 import org.spoutcraft.api.gui.Slot;
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 
-public class PacketSlotClick implements SpoutPacket {
+public class PacketSlotClick extends SpoutPacket {
 	private UUID screen;
 	private UUID slot;
 	private int mouseClick;
 	private boolean holdingShift;
 
-	public PacketSlotClick() {
+	protected PacketSlotClick() {
 	}
 
 	public PacketSlotClick(Slot slot, int mouseClick, boolean holdingShift) {
@@ -42,37 +42,30 @@ public class PacketSlotClick implements SpoutPacket {
 		this.holdingShift = holdingShift;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		long msb = input.readLong();
-		long lsb = input.readLong();
-		screen = new UUID(msb,lsb);
-		msb = input.readLong();
-		lsb = input.readLong();
-		slot = new UUID(msb,lsb);
-		mouseClick = input.read();
-		holdingShift = input.readBoolean();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		long msb = buf.getLong();
+		long lsb = buf.getLong();
+		screen = new UUID(msb, lsb);
+		msb = buf.getLong();
+		lsb = buf.getLong();
+		slot = new UUID(msb, lsb);
+		button = buf.getInt();
+		holdingShift = buf.getBoolean();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeLong(screen.getMostSignificantBits());
-		output.writeLong(screen.getLeastSignificantBits()); // 16
-		output.writeLong(slot.getMostSignificantBits());
-		output.writeLong(slot.getLeastSignificantBits()); // 32
-		output.write(mouseClick); // mouseClick will usually be 0 (left) or 1 (right) - so this is safe unless the mouse has... 257 buttons :P
-		output.writeBoolean(holdingShift);//34
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putLong(screen.getMostSignificantBits());
+		buf.putLong(screen.getLeastSignificantBits()); // 16
+		buf.putLong(slot.getMostSignificantBits());
+		buf.putLong(slot.getLeastSignificantBits()); // 32
+		buf.putInt(button); // mouseClick will usually be 0 (left) or 1 (right) - so this is safe unless the mouse has... 257 buttons :P
+		buf.putBoolean(holdingShift);//34
 	}
-
-	public void run(int playerId) {
-	}
-
-	public void failure(int playerId) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketSlotClick;
-	}
-
-	public int getVersion() {
-		return 0;
+	
+	@Override
+	public void handle(SpoutPlayer player) {
+		// Nothing to do.
 	}
 }

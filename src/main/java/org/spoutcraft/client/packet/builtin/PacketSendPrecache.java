@@ -28,29 +28,31 @@ import java.util.zip.Inflater;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.precache.PrecacheManager;
 import org.spoutcraft.client.precache.PrecacheTuple;
 
-public class PacketSendPrecache implements CompressablePacket {
+public class PacketSendPrecache extends CompressablePacket {
 	private byte[] fileData;
 	private String plugin;
 	private String version;
 	private boolean compressed = false;
 
-	public PacketSendPrecache() {
+	protected PacketSendPrecache() {
 	}
 
-	public PacketSendPrecache(File file) {
+	public PacketSendPrecache(Plugin plugin, File file) {
 		try {
 			this.fileData = FileUtils.readFileToByteArray(file);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		this.plugin = plugin.getDescription().getName();
+		this.version = plugin.getDescription().getVersion();
 	}
 
-	// TODO move to separate thread?
+	@Override
 	public void compress() {
 		if (!compressed) {
 			Deflater deflater = new Deflater();
@@ -73,63 +75,54 @@ public class PacketSendPrecache implements CompressablePacket {
 		}
 	}
 
-	public boolean isCompressed() {
-		return compressed;
-	}
-
+	@Override
 	public void decompress() {
 		if (compressed) {
 			Inflater decompressor = new Inflater();
 			decompressor.setInput(fileData);
-
 			ByteArrayOutputStream bos = new ByteArrayOutputStream(fileData.length);
-
 			byte[] buf = new byte[1024];
 			while (!decompressor.finished()) {
 				try {
 					int count = decompressor.inflate(buf);
 					bos.write(buf, 0, count);
-				} catch (DataFormatException e) {
+				} catch (DataFormatException ignored) {
 				}
 			}
 			try {
 				bos.close();
-			} catch (IOException e) {
+			} catch (IOException ignored) {
 			}
-
 			fileData = bos.toByteArray();
 		}
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		this.plugin = input.readString();
-		this.version = input.readString();
-		compressed = input.readBoolean();
-		int size = input.readInt();
+	@Override
+	public boolean isCompressed() {
+		return compressed;
+	}
+
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		this.plugin = buf.getUTF8();
+		this.version = buf.getUTF8();
+		compressed = buf.getBoolean();
+		int size = buf.getInt();
 		this.fileData = new byte[size];
-		input.read(fileData);
+		buf.get(fileData);
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeString(plugin);
-		output.writeString(version);
-		output.writeBoolean(compressed);
-		output.writeInt(fileData.length);
-		output.write(fileData);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putUTF8(plugin);
+		buf.putUTF8(version);
+		buf.putBoolean(compressed);
+		buf.putInt(fileData.length);
+		buf.put(fileData);
 	}
-
-	public void failure(int playerId) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketSendPrecache;
-	}
-
-	public int getVersion() {
-		return 0;
-	}
-
-	public void run(int playerId) {
+	
+	@Override
+	public void handle(SpoutPlayer player) {
 		// Packet recieved, grabbing the zip file
 		File zip = PrecacheManager.getPluginPreCacheFile(plugin, version);
 		if (zip.exists()) {
