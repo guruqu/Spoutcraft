@@ -32,46 +32,105 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import net.minecraft.src.Minecraft;
 import net.minecraft.src.WorldClient;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.entity.CraftEntity;
 
-public class PacketEntityInformation implements CompressablePacket {
+public class PacketEntityInformation extends CompressiblePacket {
 	private boolean compressed = false;
 	private byte[] data = null;
 
-	public PacketEntityInformation() {
+	protected PacketEntityInformation() {
 	}
 
-	public PacketEntityInformation(List<CraftEntity> entities) {
-		ByteBuffer tempbuffer = ByteBuffer.allocate(entities.size() * 4);
-		for (CraftEntity e : entities) {
+	public PacketEntityInformation(List<LivingEntity> entities) {
+		ByteBuffer tempbuffer = ByteBuffer.allocate(entities.size() * 20); //4 bytes for entity id, 16 for uuid
+		for (Entity e : entities) {
+			tempbuffer.putLong(e.getUniqueId().getLeastSignificantBits());
+			tempbuffer.putLong(e.getUniqueId().getMostSignificantBits());
 			tempbuffer.putInt(e.getEntityId());
 		}
 		data = tempbuffer.array();
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		int size = input.readInt();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		int size = buf.getInt();
 		if (size > 0) {
 			data = new byte[size];
-			input.read(data);
+			buf.get(data);
 		}
-		compressed = input.readBoolean();
+		compressed = buf.getBoolean();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
 		if (data != null) {
-			output.writeInt(data.length);
-			output.write(data);
+			buf.putInt(data.length);
+			buf.put(data);
 		} else {
-			output.writeInt(0);
+			buf.putInt(0);
 		}
-		output.writeBoolean(compressed);
+		buf.putBoolean(compressed);
+	}	
+
+	@Override
+	public void compress() {
+		if (!compressed) {
+			if (data != null) {
+				Deflater deflater = new Deflater();
+				deflater.setInput(data);
+				deflater.setLevel(Deflater.BEST_COMPRESSION);
+				deflater.finish();
+				ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length);
+				byte[] buffer = new byte[1024];
+				while (!deflater.finished()) {
+					int bytesCompressed = deflater.deflate(buffer);
+					bos.write(buffer, 0, bytesCompressed);
+				}
+				try {
+					bos.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				data = bos.toByteArray();
+			}
+			compressed = true;
+		}
 	}
 
-	public void run(int playerId) {
+	@Override
+	public void decompress() {
+		if (compressed) {
+			Inflater decompressor = new Inflater();
+			decompressor.setInput(data);
+
+			ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length);
+
+			byte[] buf = new byte[1024];
+			while (!decompressor.finished()) {
+				try {
+					int count = decompressor.inflate(buf);
+					bos.write(buf, 0, count);
+				} catch (DataFormatException ignored) {
+				}
+			}
+			try {
+				bos.close();
+			} catch (IOException ignored) {
+			}
+
+			data = bos.toByteArray();
+		}
+	}
+
+	@Override
+	public boolean isCompressed() {
+		return compressed;
+	}
+
+	public void handle(SpoutPlayer player) {
 		if (Minecraft.getMinecraft().theWorld instanceof WorldClient) {
 			ByteBuffer rawData = ByteBuffer.allocate(data.length);
 			rawData.put(data);
@@ -87,69 +146,5 @@ public class PacketEntityInformation implements CompressablePacket {
 				}
 			}
 		}
-	}
-
-	public void failure(int playerId) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketEntityInformation;
-	}
-
-	public int getVersion() {
-		return 0;
-	}
-
-	public void compress() {
-		if (!compressed) {
-			if (data != null) {
-				Deflater deflater = new Deflater();
-				deflater.setInput(data);
-				deflater.setLevel(Deflater.BEST_COMPRESSION);
-				deflater.finish();
-				ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length);
-				byte[] buffer = new byte[1024];
-				while (!deflater.finished())
-				{
-					int bytesCompressed = deflater.deflate(buffer);
-					bos.write(buffer, 0, bytesCompressed);
-				}
-				try {
-					bos.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				data = bos.toByteArray();
-			}
-			compressed = true;
-		}
-	}
-
-	public void decompress() {
-		if (compressed) {
-			Inflater decompressor = new Inflater();
-			decompressor.setInput(data);
-
-			ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length);
-
-			byte[] buf = new byte[1024];
-			while (!decompressor.finished()) {
-				try {
-					int count = decompressor.inflate(buf);
-					bos.write(buf, 0, count);
-				} catch (DataFormatException e) {
-				}
-			}
-			try {
-				bos.close();
-			} catch (IOException e) {
-			}
-
-			data = bos.toByteArray();
-		}
-	}
-
-	public boolean isCompressed() {
-		return compressed;
 	}
 }

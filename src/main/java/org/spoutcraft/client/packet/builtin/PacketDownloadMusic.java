@@ -22,8 +22,8 @@ package org.spoutcraft.client.packet.builtin;
 import java.io.File;
 import java.io.IOException;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.io.Download;
 import org.spoutcraft.client.io.FileDownloadThread;
@@ -33,36 +33,57 @@ import org.spoutcraft.client.sound.QueuedSound;
 public class PacketDownloadMusic implements SpoutPacket {
 	int x, y, z;
 	int volume, distance;
-	boolean soundEffect, notify;
+	boolean soundEffect, notify;	
 	String url, plugin;
+
 	public PacketDownloadMusic() {
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		url = input.readString();
-		plugin = input.readString();
-		distance = input.readInt();
-		x = input.readInt();
-		y = input.readInt();
-		z = input.readInt();
-		volume = input.readInt();
-		soundEffect = input.readBoolean();
-		notify = input.readBoolean();
+	public PacketDownloadMusic(String plugin, String URL, Location loc, int distance, int volume, boolean soundEffect, boolean notify) {
+		this.plugin = plugin;
+		this.URL = URL;
+		this.volume = volume;
+		this.soundEffect = soundEffect;
+		this.notify = notify;
+		if (loc != null) {
+			x = loc.getBlockX();
+			y = loc.getBlockY();
+			z = loc.getBlockZ();
+			this.distance = distance;
+		} else {
+			this.distance = -1;
+		}
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeString(url);
-		output.writeString(plugin);
-		output.writeInt(distance);
-		output.writeInt(x);
-		output.writeInt(y);
-		output.writeInt(z);
-		output.writeInt(volume);
-		output.writeBoolean(soundEffect);
-		output.writeBoolean(notify);
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		URL = buf.getUTF8();
+		plugin = buf.getUTF8();
+		distance = buf.getInt();
+		x = buf.getInt();
+		y = buf.getInt();
+		z = buf.getInt();
+		volume = buf.getInt();
+		soundEffect = buf.getBoolean();
+		notify = buf.getBoolean();
 	}
 
-	public void run(int PlayerId) {
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putUTF8(URL);
+		buf.putUTF8(plugin);
+		buf.putInt(distance);
+		buf.putInt(x);
+		buf.putInt(y);
+		buf.putInt(z);
+		buf.putInt(volume);
+		buf.putBoolean(soundEffect);
+		buf.putBoolean(notify);
+	}
+
+
+
+	public void handle(SpoutPlayer player) {
 		File directory = new File(FileUtil.getTempDir(), plugin);
 		if (!directory.exists()) {
 			directory.mkdir();
@@ -88,16 +109,5 @@ public class PacketDownloadMusic implements SpoutPacket {
 			SpoutClient.getInstance().getActivePlayer().showAchievement("Downloading Music...", fileName, 2256 /*Gold Record*/);
 		}
 		FileDownloadThread.getInstance().addToDownloadQueue(download);
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketDownloadMusic;
-	}
-
-	public int getVersion() {
-		return 0;
-	}
-
-	public void failure(int playerId) {
-	}
+	}	
 }

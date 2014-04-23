@@ -24,15 +24,17 @@ import java.util.UUID;
 
 import org.spoutcraft.api.gui.Screen;
 import org.spoutcraft.api.gui.Widget;
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 
 public class PacketControlAction implements SpoutPacket {
 	protected UUID screen;
 	protected UUID widget;
 	protected float state;
 	protected String data = "";
-	public PacketControlAction() {
+
+
+	protected PacketControlAction() {
 	}
 
 	public PacketControlAction(Screen screen, Widget widget, float state) {
@@ -41,45 +43,30 @@ public class PacketControlAction implements SpoutPacket {
 		this.state = state;
 	}
 
-	public PacketControlAction(Screen screen, Widget widget, String data, float position) {
+	public PacketControlAction(Screen screen, Widget widget, float state, String data) {
 		this.screen = screen.getId();
 		this.widget = widget.getId();
-		this.state = position;
+		this.state = state;
 		this.data = data;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		long msb = input.readLong();
-		long lsb = input.readLong();
-		this.screen = new UUID(msb, lsb);
-		msb = input.readLong();
-		lsb = input.readLong();
-		this.widget = new UUID(msb, lsb);
-		this.state = input.readFloat();
-		this.data = input.readString();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		this.screen = buf.getUUID();
+		this.widget = buf.getUUID();
+		this.state = buf.getFloat();
+		this.data = buf.getUTF8();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeLong(screen.getMostSignificantBits());
-		output.writeLong(screen.getLeastSignificantBits());
-		output.writeLong(widget.getMostSignificantBits());
-		output.writeLong(widget.getLeastSignificantBits());
-		output.writeFloat(state);
-		output.writeString(data);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putUUID(screen);
+		buf.putUUID(widget);
+		buf.putFloat(state);
+		buf.putUTF8(data);
 	}
 
-	public void run(int playerId) {
+	public void handle(SpoutPlayer player) {
 		// Nothing to do
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketControlAction;
-	}
-
-	public int getVersion() {
-		return 0;
-	}
-
-	public void failure(int playerId) {
 	}
 }

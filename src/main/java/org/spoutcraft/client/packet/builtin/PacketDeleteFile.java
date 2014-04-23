@@ -21,46 +21,38 @@ package org.spoutcraft.client.packet.builtin;
 
 import java.io.IOException;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 
-public class PacketCacheDeleteFile implements SpoutPacket {
+public class PacketDeleteFile implements SpoutPacket {
 	private String plugin;
 	private String fileName;
-	public PacketCacheDeleteFile() {
+	
+	protected PacketDeleteFile() {
 	}
 
-	public PacketCacheDeleteFile(String plugin, String fileName) {
+	public PacketDeleteFile(String plugin, String fileName) {
 		this.plugin = plugin;
 		this.fileName = fileName;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		fileName = input.readString();
-		plugin = input.readString();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		plugin = buf.getUTF8();
+		fileName = buf.getUTF8();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeString(fileName);
-		output.writeString(plugin);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		throw new IOException("The client should not send a PacketDeleteFile from the client (hack?)!");		
 	}
 
-	public void run(int playerId) {
+	@Override
+	public void handle(SpoutPlayer player) {
 		// TODO Fix security vulnerability: http://pastie.org/private/qdmx5veidnood1ectllkcq
 		/*File file = FileUtil.findFile(plugin, fileName);
 		if (file != null) {
 			file.delete();
 		}*/
-	}
-
-	public void failure(int playerId) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketCacheDeleteFile;
-	}
-
-	public int getVersion() {
-		return 0;
-	}
+	}	
 }

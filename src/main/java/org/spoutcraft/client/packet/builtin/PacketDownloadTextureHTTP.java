@@ -23,8 +23,8 @@ import java.io.IOException;
 
 import net.minecraft.src.AbstractClientPlayer;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
 public class PacketSkinURL implements SpoutPacket {
@@ -32,43 +32,46 @@ public class PacketSkinURL implements SpoutPacket {
 	public String skinURL;
 	public String cloakURL;
 	public boolean release = true;
-	public PacketSkinURL() {
+
+	protected PacketDownloadTextureHTTP() {
 	}
 
-	public PacketSkinURL(int id, String skinURL, String cloakURL) {
+	public PacketDownloadTextureHTTP(int id, String skinURL, String cloakURL) {
 		this.entityId = id;
 		this.skinURL = skinURL;
 		this.cloakURL = cloakURL;
 		release = false;
 	}
 
-	public PacketSkinURL(int id, String skinURL) {
+	public PacketDownloadTextureHTTP(int id, String skinURL) {
 		this.entityId = id;
 		this.skinURL = skinURL;
 		this.cloakURL = "none";
 	}
 
-	public PacketSkinURL(String cloakURL, int id) {
+	public PacketDownloadTextureHTTP(String cloakURL, int id) {
 		this.entityId = id;
 		this.skinURL = "none";
 		this.cloakURL = cloakURL;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		entityId = input.readInt();
-		skinURL = input.readString();
-		cloakURL = input.readString();
-		release = input.readBoolean();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		entityId = buf.getInt();
+		skinURL = buf.getUTF8();
+		cloakURL = buf.getUTF8();
+		release = buf.getBoolean();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeInt(entityId);
-		output.writeString(skinURL);
-		output.writeString(cloakURL);
-		output.writeBoolean(release);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putInt(entityId);
+		buf.putUTF8(skinURL);
+		buf.putUTF8(cloakURL);
+		buf.putBoolean(release);
 	}
 
-	public void run(int PlayerId) {
+	public void handle(SpoutPlayer player) {
 		AbstractClientPlayer e = SpoutClient.getInstance().getAbstractPlayerFromId(entityId);
 		if (e != null) {
 			// Check if these are the Minecraft skin/cape, if so, use defaults instead
@@ -94,20 +97,9 @@ public class PacketSkinURL implements SpoutPacket {
 			if (!"none".equals(this.cloakURL)) {
 				e.customCapeUrl = this.cloakURL;
 			}
-									
+
 			e.setupCustomSkin();
 
 		}
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketSkinURL;
-	}
-
-	public int getVersion() {
-		return 1;
-	}
-
-	public void failure(int playerId) {
 	}
 }

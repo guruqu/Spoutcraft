@@ -32,21 +32,21 @@ import net.minecraft.src.EntityClientPlayerMP;
 import net.minecraft.src.Minecraft;
 import net.minecraft.src.Packet0KeepAlive;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.io.CustomTextureManager;
 import org.spoutcraft.client.io.FileUtil;
 
-public class PacketCacheFile implements CompressablePacket {
+public class PacketDownloadFile implements CompressiblePacket {
 	private String plugin;
 	private byte[] fileData;
 	private String fileName;
 	private boolean compressed = false;
 
-	public PacketCacheFile() {
+	protected PacketDownloadFile() {
 	}
 
-	public PacketCacheFile(String plugin, File file) {
+	public PacketDownloadFile(String plugin, File file) {
 		this.plugin = plugin;
 		try {
 			this.fileData = FileUtils.readFileToByteArray(file);
@@ -56,7 +56,22 @@ public class PacketCacheFile implements CompressablePacket {
 		this.fileName = FileUtil.getFileName(file.getPath());
 	}
 
-	// TODO move to separate thread?
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		fileName = buf.getUTF8();
+		plugin = buf.getUTF8();
+		compressed = buf.getBoolean();
+		int size = buf.getInt();
+		this.fileData = new byte[size];
+		buf.get(fileData);		
+	}
+
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		throw new IOException("The server should not receive a PacketDownloadFile from the client (hack?)!");
+	}
+	
+	@Override
 	public void compress() {
 		if (!compressed) {
 			Deflater deflater = new Deflater();
@@ -79,10 +94,7 @@ public class PacketCacheFile implements CompressablePacket {
 		}
 	}
 
-	public boolean isCompressed() {
-		return compressed;
-	}
-
+	@Override
 	public void decompress() {
 		if (compressed) {
 			Inflater decompressor = new Inflater();
@@ -95,36 +107,24 @@ public class PacketCacheFile implements CompressablePacket {
 				try {
 					int count = decompressor.inflate(buf);
 					bos.write(buf, 0, count);
-				} catch (DataFormatException e) {
+				} catch (DataFormatException ignored) {
 				}
 			}
 			try {
 				bos.close();
-			} catch (IOException e) {
+			} catch (IOException ignored) {
 			}
 
 			fileData = bos.toByteArray();
 		}
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		this.fileName = input.readString();
-		this.plugin = input.readString();
-		compressed = input.readBoolean();
-		int size = input.readInt();
-		this.fileData = new byte[size];
-		input.read(fileData);
+	@Override
+	public boolean isCompressed() {
+		return compressed;
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeString(fileName);
-		output.writeString(plugin);
-		output.writeBoolean(compressed);
-		output.writeInt(fileData.length);
-		output.write(fileData);
-	}
-
-	public void run(int playerId) {
+	public void handle(SpoutPlayer player) {
 		this.fileName = FileUtil.getFileName(this.fileName);
 		if (!FileUtil.canCache(fileName)) {
 			System.out.println("WARNING, " + plugin + " tried to cache an invalid file type: " + fileName);
@@ -144,17 +144,5 @@ public class PacketCacheFile implements CompressablePacket {
 			CustomTextureManager.getTextureFromUrl(plugin, fileName);
 		}
 		((EntityClientPlayerMP)Minecraft.getMinecraft().thePlayer).sendQueue.addToSendQueue(new Packet0KeepAlive());
-	}
-
-	public void failure(int playerId) {
-		// TODO Auto-generated method stub
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketCacheFile;
-	}
-
-	public int getVersion() {
-		return 1;
-	}
+	}	
 }
