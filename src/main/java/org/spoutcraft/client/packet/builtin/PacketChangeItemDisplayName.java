@@ -42,9 +42,9 @@ public class PacketChangeItemDisplayName implements SpoutPacket {
 
 	@Override
 	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
-		buf.putInt(id);
-		buf.putShort(data);
-		buf.putUTF8(name);		
+		id = buf.getInt();
+		data = buf.getShort();
+		name = buf.getUTF8();
 	}
 
 	@Override
