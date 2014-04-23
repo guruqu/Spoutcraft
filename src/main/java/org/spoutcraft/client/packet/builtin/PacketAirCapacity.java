@@ -25,7 +25,7 @@ import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.player.SpoutPlayer;
 
-public class PacketAirTime implements SpoutPacket {
+public class PacketAirTime extends SpoutPacket {
 	public int airTime;
 	public int air;
 

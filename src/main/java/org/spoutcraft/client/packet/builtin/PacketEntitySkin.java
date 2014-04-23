@@ -27,7 +27,7 @@ import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.entity.CraftEntity;
 
-public class PacketEntitySkin implements SpoutPacket {
+public class PacketEntitySkin extends SpoutPacket {
 	protected String texture = "";
 	protected int entityId;
 	protected byte textureId = 0;

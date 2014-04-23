@@ -24,7 +24,7 @@ import java.io.IOException;
 import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.player.SpoutPlayer;
 
-public class PacketClipboardText implements SpoutPacket {
+public class PacketClipboardText extends SpoutPacket {
 	private String text;
 	
 	protected PacketClipboardText() {

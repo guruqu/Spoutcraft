@@ -26,7 +26,7 @@ import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.api.material.Material;
 import org.spoutcraft.api.material.MaterialData;
 
-public class PacketChangeItemDisplayName implements SpoutPacket {
+public class PacketChangeItemDisplayName extends SpoutPacket {
 	private int id;
 	private short data;
 	private String name;

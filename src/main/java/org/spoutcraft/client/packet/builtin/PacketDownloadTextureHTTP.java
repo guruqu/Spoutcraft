@@ -27,7 +27,7 @@ import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketSkinURL implements SpoutPacket {
+public class PacketSkinURL extends SpoutPacket {
 	public int entityId;
 	public String skinURL;
 	public String cloakURL;

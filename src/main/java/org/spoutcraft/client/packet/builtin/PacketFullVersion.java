@@ -24,7 +24,7 @@ import java.io.IOException;
 import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.player.SpoutPlayer;
 
-public class PacketFullVersion implements SpoutPacket {
+public class PacketFullVersion extends SpoutPacket {
 	private String version;
 
 	protected PacketFullVersion() {

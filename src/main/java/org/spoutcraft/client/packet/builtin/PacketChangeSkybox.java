@@ -27,7 +27,7 @@ import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.api.player.SkyManager;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketChangeSkybox implements SpoutPacket {
+public class PacketChangeSkybox extends SpoutPacket {
 	private int cloudY, stars, sunPercent, moonPercent;
 	private Color skyColor, fogColor, cloudColor;
 	String sun = "";

@@ -28,7 +28,7 @@ import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketComboBox implements SpoutPacket {
+public class PacketComboBox extends SpoutPacket {
 	private GenericComboBox box;
 	private UUID uuid;
 	private boolean open;

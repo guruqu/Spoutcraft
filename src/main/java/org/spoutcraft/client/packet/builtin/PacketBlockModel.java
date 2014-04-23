@@ -27,7 +27,7 @@ import org.spoutcraft.api.io.SpoutOutputStream;
 import org.spoutcraft.api.material.CustomBlock;
 import org.spoutcraft.api.material.MaterialData;
 
-public class PacketBlockModel implements SpoutPacket {
+public class PacketBlockModel extends SpoutPacket {
 	private short customId;
 	private byte data;
 	private GenericBlockDesign design;

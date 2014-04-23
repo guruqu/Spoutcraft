@@ -24,7 +24,7 @@ import java.io.IOException;
 import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.player.SpoutPlayer;
 
-public class PacketDeleteFile implements SpoutPacket {
+public class PacketDeleteFile extends SpoutPacket {
 	private String plugin;
 	private String fileName;
 	

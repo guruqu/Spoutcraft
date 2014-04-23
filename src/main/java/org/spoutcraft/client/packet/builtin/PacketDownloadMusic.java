@@ -30,7 +30,7 @@ import org.spoutcraft.client.io.FileDownloadThread;
 import org.spoutcraft.client.io.FileUtil;
 import org.spoutcraft.client.sound.QueuedSound;
 
-public class PacketDownloadMusic implements SpoutPacket {
+public class PacketDownloadMusic extends SpoutPacket {
 	int x, y, z;
 	int volume, distance;
 	boolean soundEffect, notify;	

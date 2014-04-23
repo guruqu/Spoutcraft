@@ -27,7 +27,7 @@ import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.api.keyboard.KeyBinding;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketKeyBinding implements SpoutPacket {
+public class PacketKeyBinding extends SpoutPacket {
 	private String id;
 	private String plugin;
 	private String description;

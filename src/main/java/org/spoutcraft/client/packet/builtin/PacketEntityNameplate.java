@@ -31,7 +31,7 @@ import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.SpoutcraftWorld;
 import org.spoutcraft.client.entity.CraftLivingEntity;
 
-public class PacketEntityNameplate implements SpoutPacket {
+public class PacketEntityNameplate extends SpoutPacket {
 	public String title;
 	public int entityId;
 

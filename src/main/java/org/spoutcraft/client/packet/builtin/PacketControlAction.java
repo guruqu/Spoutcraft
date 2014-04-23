@@ -27,7 +27,7 @@ import org.spoutcraft.api.gui.Widget;
 import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.player.SpoutPlayer;
 
-public class PacketControlAction implements SpoutPacket {
+public class PacketControlAction extends SpoutPacket {
 	protected UUID screen;
 	protected UUID widget;
 	protected float state;

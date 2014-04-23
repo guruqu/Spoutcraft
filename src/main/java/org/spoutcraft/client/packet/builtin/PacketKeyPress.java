@@ -27,7 +27,7 @@ import org.spoutcraft.api.gui.ScreenType;
 import org.spoutcraft.api.io.SpoutInputStream;
 import org.spoutcraft.api.io.SpoutOutputStream;
 
-public class PacketKeyPress implements SpoutPacket {
+public class PacketKeyPress extends SpoutPacket {
 	public boolean pressDown;
 	public int key;
 	public byte settingKeys[] = new byte[10];

@@ -29,7 +29,7 @@ import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.api.player.RenderDistance;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketChangeRenderDistance implements SpoutPacket {
+public class PacketChangeRenderDistance extends SpoutPacket {
 	protected byte view = -1;
 	protected byte max = -1;
 	protected byte min = -1;

@@ -25,7 +25,7 @@ import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketChangeMusic implements SpoutPacket {
+public class PacketChangeMusic extends SpoutPacket {
 	public int id;
 	public int volumePercent;
 	public boolean cancel = false;
