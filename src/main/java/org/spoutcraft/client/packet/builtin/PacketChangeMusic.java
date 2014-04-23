@@ -25,15 +25,15 @@ import org.spoutcraft.api.io.SpoutInputStream;
 import org.spoutcraft.api.io.SpoutOutputStream;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketMusicChange implements SpoutPacket {
-	protected int id;
-	protected int volumePercent;
-	boolean cancel = false;
+public class PacketChangeMusic implements SpoutPacket {
+	public int id;
+	public int volumePercent;
+	public boolean cancel = false;
 
-	public PacketMusicChange() {
+	protected PacketChangeMusic() {
 	}
 
-	public PacketMusicChange(int music, int volumePercent) {
+	public PacketChangeMusic(int music, int volumePercent) {
 		this.id = music;
 		this.volumePercent = volumePercent;
 	}
@@ -42,34 +42,25 @@ public class PacketMusicChange implements SpoutPacket {
 		return cancel;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		id = input.readInt();
-		volumePercent = input.readInt();
-		cancel =  input.readBoolean();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		id = buf.getInt();
+		volumePercent = buf.getInt();
+		cancel = buf.getBoolean();
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeInt(id);
-		output.writeInt(volumePercent);
-		output.writeBoolean(cancel);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putInt(id);
+		buf.putInt(volumePercent);
+		buf.putBoolean(cancel);
 	}
 
-	public void run(int playerId) {
+	public void handle(SpoutPlayer player) {
 		if (cancel) {
 			SpoutClient.getHandle().sndManager.cancelled = true;
 		} else {
 			SpoutClient.getHandle().sndManager.allowed = true;
 		}
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketMusicChange;
-	}
-
-	public int getVersion() {
-		return 0;
-	}
-
-	public void failure(int playerId) {
-	}
+	}	
 }

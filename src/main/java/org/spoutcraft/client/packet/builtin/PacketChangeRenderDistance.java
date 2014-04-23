@@ -29,34 +29,50 @@ import org.spoutcraft.api.io.SpoutOutputStream;
 import org.spoutcraft.api.player.RenderDistance;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketRenderDistance implements SpoutPacket {
+public class PacketChangeRenderDistance implements SpoutPacket {
 	protected byte view = -1;
 	protected byte max = -1;
 	protected byte min = -1;
-	public PacketRenderDistance() {
+	
+	protected PacketChangeRenderDistance() {
 	}
 
-	public PacketRenderDistance(byte view) {
-		this.view = view;
+	public PacketChangeRenderDistance(boolean resetMax, boolean resetMin) {
+		if (resetMax) {
+			max = RenderDistance.RESET;
+		}
+		if (resetMin) {
+			min = RenderDistance.RESET;
+		}
 	}
 
-	public int getNumBytes() {
-		return 3;
+	public PacketChangeRenderDistance(RenderDistance distance, RenderDistance max, RenderDistance min) {
+		if (distance != null) {
+			this.distance = distance;
+		}
+		if (max != null) {
+			this.max = max;
+		}
+		if (min != null) {
+			this.min = min;
+		}
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		view = (byte) input.read();
-		max = (byte) input.read();
-		min = (byte) input.read();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		distance = RenderDistance.get(buf.get());
+		max = RenderDistance.get(buf.get());
+		min = RenderDistance.get(buf.get());
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.write(view);
-		output.write(max);
-		output.write(min);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.put(distance.getValue());
+		buf.put(max.getValue());
+		buf.put(min.getValue());
 	}
 
-	public void run(int PlayerId) {
+	public void handle(SpoutPlayer player) {
 		Minecraft game = SpoutClient.getHandle();
 		if (game != null) {
 			GameSettings settings = game.gameSettings;
@@ -76,16 +92,5 @@ public class PacketRenderDistance implements SpoutPacket {
 		if (max == -2) {
 			SpoutClient.getInstance().getActivePlayer().setMinimumView(RenderDistance.FAR);
 		}
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketRenderDistance;
-	}
-
-	public int getVersion() {
-		return 0;
-	}
-
-	public void failure(int playerId) {
 	}
 }
