@@ -7,7 +7,7 @@ import org.spoutcraft.api.util.FixedLocation;
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.config.Configuration;
 import org.spoutcraft.client.gui.minimap.GuiOverviewMap;
-import org.spoutcraft.client.packet.PacketRenderDistance;
+import org.spoutcraft.client.packet.builtin.PacketChangeRenderDistance;
 import org.spoutcraft.client.player.ClientPlayer;
 // Spout End
 
@@ -604,7 +604,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
 					Configuration.setRenderDistance(newView);
 					Configuration.write();
 					if (this instanceof EntityClientPlayerMP && Spoutcraft.getClient().isSpoutEnabled()) {
-						SpoutClient.getInstance().getPacketManager().sendSpoutPacket(new PacketRenderDistance((byte)newView));
+						SpoutClient.getInstance().getPacketManager().sendSpoutPacket(new PacketChangeRenderDistance((byte)newView));
 					}
 				}
 			// Sneak toggle

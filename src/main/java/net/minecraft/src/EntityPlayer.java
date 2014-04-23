@@ -20,7 +20,7 @@ import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.config.Configuration;
 import org.spoutcraft.client.gui.minimap.GuiOverviewMap;
 import org.spoutcraft.client.io.CustomTextureManager;
-import org.spoutcraft.client.packet.PacketRenderDistance;
+import org.spoutcraft.client.packet.builtin.PacketChangeRenderDistance;
 import org.spoutcraft.client.player.ClientPlayer;
 import org.spoutcraft.client.special.Resources;
 import org.spoutcraft.client.special.VIP;

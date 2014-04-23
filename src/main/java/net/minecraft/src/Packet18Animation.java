@@ -5,8 +5,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import org.spoutcraft.client.SpoutClient;
-import org.spoutcraft.client.packet.PacketFullVersion;
-import org.spoutcraft.client.packet.PacketRenderDistance;
+import org.spoutcraft.client.packet.builtin.PacketFullVersion;
+import org.spoutcraft.client.packet.buildin.PacketChangeRenderDistance;
 
 public class Packet18Animation extends Packet {
 
@@ -48,7 +48,7 @@ public class Packet18Animation extends Packet {
 		if (entityId == -42) {
 			SpoutClient.getInstance().setSpoutVersion(1);
 			((NetClientHandler) par1NetHandler).addToSendQueue(this);
-			SpoutClient.getInstance().getPacketManager().sendSpoutPacket(new PacketRenderDistance((byte)Minecraft.getMinecraft().gameSettings.renderDistance));
+			SpoutClient.getInstance().getPacketManager().sendSpoutPacket(new PacketChangeRenderDistance((byte)Minecraft.getMinecraft().gameSettings.renderDistance));
 			SpoutClient.getInstance().getPacketManager().sendSpoutPacket(new PacketFullVersion(SpoutClient.getClientVersion()));
 			System.out.println("Detected SpoutPlugin enabled server.");
 			if (this.mc.currentScreen instanceof GuiDownloadTerrain) { 

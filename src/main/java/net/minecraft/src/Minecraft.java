@@ -51,9 +51,9 @@ import org.spoutcraft.client.gui.minimap.MinimapConfig;
 import org.spoutcraft.client.gui.minimap.MinimapUtils;
 import org.spoutcraft.client.gui.minimap.Waypoint;
 import org.spoutcraft.client.io.FileUtil;
-import org.spoutcraft.client.packet.PacketScreenAction;
-import org.spoutcraft.client.packet.ScreenAction;
-import org.spoutcraft.client.packet.SpoutPacket;
+import org.spoutcraft.client.packet.builtin.PacketScreenAction;
+import org.spoutcraft.client.packet.builtin.ScreenAction;
+import org.spoutcraft.client.packet.builtin.SpoutPacket;
 import org.spoutcraft.client.spoutworth.SpoutWorth;
 
 public class Minecraft implements IPlayerUsage {

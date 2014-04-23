@@ -20,7 +20,7 @@ import thedudeguy.paulscode.sound.codecs.CodecJOrbis;
 
 import org.spoutcraft.api.sound.Music;
 import org.spoutcraft.client.SpoutClient;
-import org.spoutcraft.client.packet.PacketMusicChange;
+import org.spoutcraft.client.packet.builtin.PacketChangeMusic;
 
 // Spout Start - Unused import
 //import paulscode.sound.codecs.CodecJOrbis;
@@ -218,7 +218,7 @@ public class SoundManager implements ResourceManagerReloadListener {
 									Music music = Music.getMusicFromName(var1.soundName);
 									if (music != null) {
 										waitingSound = var1;
-										SpoutClient.getInstance().getPacketManager().sendSpoutPacket(new PacketMusicChange(music.getId(), (int)options.musicVolume * 100));
+										SpoutClient.getInstance().getPacketManager().sendSpoutPacket(new PacketChangeMusic(music.getId(), (int)options.musicVolume * 100));
 										return;
 									}
 								} else if (allowed) {
