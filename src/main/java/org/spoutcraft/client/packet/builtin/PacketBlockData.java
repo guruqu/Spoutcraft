@@ -21,41 +21,85 @@ package org.spoutcraft.client.packet.builtin;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Set;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.api.material.Block;
 import org.spoutcraft.api.material.MaterialData;
 
-public class PacketBlockData implements CompressablePacket {
-	byte[] data;
-	boolean compressed = false;
-	public PacketBlockData() {
+public class PacketBlockData extends CompressiblePacket {
+	private byte[] data;
+	private boolean compressed = false;
+
+	protected PacketBlockData() {
+	}
+
+	public PacketBlockData(Set<Block> modifiedData) {
+		if (modifiedData.size() > 0) {
+			ByteBuffer rawData = ByteBuffer.allocate(modifiedData.size() * (15));
+
+			for (Block next : modifiedData) {
+				rawData.put((byte) next.getRawId());
+				rawData.put((byte) next.getRawData());
+				rawData.putFloat(next.getHardness());
+				rawData.putInt(next.getLightLevel());
+				rawData.putFloat(next.getFriction());
+				rawData.put((byte) (next.isOpaque() ? 1 : 0));
+			}
+
+			data = rawData.array();
+		}
+	}
+
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		int size = buf.getInt();
+		compressed = buf.getBoolean();
+		if (size > 0) {
+			data = new byte[size];
+			buf.get(data);
+		}
+	}
+
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putInt(data == null ? 0 : data.length);
+		buf.putBoolean(compressed);
+		if (data != null) {
+			buf.put(data);
+		}
+	}
+
+	@Override
+	public void handle(SpoutPlayer player) {
 	}
 
 	public void compress() {
 		if (!compressed) {
-			Deflater deflater = new Deflater();
-			deflater.setInput(data);
-			deflater.setLevel(Deflater.BEST_COMPRESSION);
-			deflater.finish();
-			ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length);
-			byte[] buffer = new byte[1024];
-			while (!deflater.finished()) {
-				int bytesCompressed = deflater.deflate(buffer);
-				bos.write(buffer, 0, bytesCompressed);
+			if (data != null) {
+				Deflater deflater = new Deflater();
+				deflater.setInput(data);
+				deflater.setLevel(Deflater.BEST_COMPRESSION);
+				deflater.finish();
+				ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length);
+				byte[] buffer = new byte[1024];
+				while (!deflater.finished()) {
+					int bytesCompressed = deflater.deflate(buffer);
+					bos.write(buffer, 0, bytesCompressed);
+				}
+				try {
+					bos.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				data = bos.toByteArray();
 			}
-			try {
-				bos.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			data = bos.toByteArray();
 			compressed = true;
 		}
 	}
@@ -72,12 +116,12 @@ public class PacketBlockData implements CompressablePacket {
 				try {
 					int count = decompressor.inflate(buf);
 					bos.write(buf, 0, count);
-				} catch (DataFormatException e) {
+				} catch (DataFormatException ignored) {
 				}
 			}
 			try {
 				bos.close();
-			} catch (IOException e) {
+			} catch (IOException ignored) {
 			}
 
 			data = bos.toByteArray();
@@ -85,27 +129,10 @@ public class PacketBlockData implements CompressablePacket {
 	}
 
 	public boolean isCompressed() {
-		return compressed;
+		return compressed || (data == null || data.length < 256);
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		int size = input.readInt();
-		compressed = input.readBoolean();
-		if (size > 0) {
-			data = new byte[size];
-			input.read(data);
-		}
-	}
-
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeInt(data == null ? 0 : data.length);
-		output.writeBoolean(compressed);
-		if (data != null) {
-			output.write(data);
-		}
-	}
-
-	public void run(int playerId) {
+	public void handle(SpoutPlayer player) {
 		if (data != null) {
 			ByteBuffer result = ByteBuffer.allocate(data.length).put(data);
 			for (int i = 0; i < data.length / 15; i++) {
@@ -121,16 +148,5 @@ public class PacketBlockData implements CompressablePacket {
 				}
 			}
 		}
-	}
-
-	public void failure(int playerId) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketBlockData;
-	}
-
-	public int getVersion() {
-		return 0;
-	}
+	}	
 }
