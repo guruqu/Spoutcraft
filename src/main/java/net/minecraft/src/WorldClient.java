@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.config.Configuration;
-import org.spoutcraft.client.packet.builtin.PacketCustomBlockChunkOverride;
+import org.spoutcraft.client.packet.builtin.PacketOverrideChunk;
 
 public class WorldClient extends World {
 
@@ -124,7 +124,7 @@ public class WorldClient extends World {
 		if (par3) {
 			this.clientChunkProvider.loadChunk(par1, par2);
 			// Spout Start
-			SpoutClient.getInstance().getPacketManager().sendSpoutPacket(new PacketCustomBlockChunkOverride(par1, par2));
+			SpoutClient.getInstance().getPacketManager().sendSpoutPacket(new PacketOverrideChunk(par1, par2));
 			// Spout End
 		} else {
 			this.clientChunkProvider.unloadChunk(par1, par2);

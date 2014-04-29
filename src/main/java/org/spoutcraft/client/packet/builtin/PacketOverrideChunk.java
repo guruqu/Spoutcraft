@@ -22,6 +22,7 @@ package org.spoutcraft.client.packet.builtin;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
@@ -32,14 +33,18 @@ import net.minecraft.src.EnumSkyBlock;
 import net.minecraft.src.World;
 
 import org.spoutcraft.api.Spoutcraft;
+import org.spoutcraft.api.io.ExpandableByteBuffer;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.api.io.SpoutInputStream;
 import org.spoutcraft.api.io.SpoutOutputStream;
 import org.spoutcraft.api.material.CustomBlock;
 import org.spoutcraft.api.material.MaterialData;
 import org.spoutcraft.client.SpoutClient;
+import org.spoutcraft.client.block.SpoutcraftChunk;
 import org.spoutcraft.client.packet.LightingThread.LightingData;
+import org.spoutcraft.client.player.SpoutPlayer;
 
-public class PacketCustomBlockChunkOverride implements CompressablePacket {
+public class PacketOverrideChunk extends CompressiblePacket {
 	private static LightingThread thread;
 	private int chunkX;
 	private int chunkZ;
@@ -47,37 +52,39 @@ public class PacketCustomBlockChunkOverride implements CompressablePacket {
 	private byte[] data;
 	private boolean compressed = true;
 
-	public PacketCustomBlockChunkOverride() {
+	protected PacketOverrideChunk() {
 	}
 
-	public PacketCustomBlockChunkOverride(int x, int z) {
+	public PacketOverrideChunk(int x, int z) {
 		chunkX = x;
 		chunkZ = z;
 		compressed = false;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		chunkX = input.readInt();
-		chunkZ = input.readInt();
-		hasData = input.readBoolean();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		chunkX = buf.getInt();
+		chunkZ = buf.getInt();
+		hasData = buf.getBoolean();
 		if (hasData) {
-			int size = input.readInt();
-			data = new byte[size];
-			input.read(data);
+			data = new byte[buf.getInt()];
+			buf.get(data);
 		}
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeInt(chunkX);
-		output.writeInt(chunkZ);
-		output.writeBoolean(hasData);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putInt(chunkX);
+		buf.putInt(chunkZ);
+		buf.putBoolean(hasData);
 		if (hasData) {
-			output.writeInt(data.length);
-			output.write(data);
+			buf.putInt(data.length);
+			buf.put(data);
 		}
 	}
 
-	public void run(int playerId) {
+	@Override
+	public void handle(SpoutPlayer player) {
 		if (hasData) {
 			if (!SpoutClient.getInstance().getRawWorld().chunkProvider.chunkExists(chunkX, chunkZ)) {
 				return;
@@ -96,23 +103,14 @@ public class PacketCustomBlockChunkOverride implements CompressablePacket {
 				customIds[i] = buffer.getShort(i * 3);
 				customData[i] = buffer.get((i * 3) + 2);
 			}
-			Spoutcraft.getChunk(SpoutClient.getInstance().getRawWorld(), chunkX, chunkZ).setCustomBlockIds(customIds);
-			Spoutcraft.getChunk(SpoutClient.getInstance().getRawWorld(), chunkX, chunkZ).setCustomBlockData(customData);
+			final SpoutcraftChunk chunk = Spoutcraft.getChunk(SpoutClient.getInstance().getRawWorld(), chunkX, chunkZ);
+			chunk.setCustomBlockIds(customIds);
+			chunk.setCustomBlockData(customData);
 			thread.queue.add(new LightingData(chunkX, chunkZ, customIds));
 		}
 	}
 
-	public void failure(int playerId) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketCustomBlockChunkOverride;
-	}
-
-	public int getVersion() {
-		return 2;
-	}
-
+	@Override
 	public void compress() {
 		if (!compressed && hasData) {
 			if (data != null) {
@@ -120,16 +118,11 @@ public class PacketCustomBlockChunkOverride implements CompressablePacket {
 				deflater.setInput(data);
 				deflater.setLevel(Deflater.BEST_COMPRESSION);
 				deflater.finish();
-				ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length);
-				byte[] buffer = new byte[1024];
+				final ExpandableByteBuffer buf = new ExpandableByteBuffer(data.length);
 				while (!deflater.finished()) {
+					deflater.deflate()
 					int bytesCompressed = deflater.deflate(buffer);
 					bos.write(buffer, 0, bytesCompressed);
-				}
-				try {
-					bos.close();
-				} catch (IOException e) {
-					e.printStackTrace();
 				}
 				data = bos.toByteArray();
 			}
@@ -137,6 +130,7 @@ public class PacketCustomBlockChunkOverride implements CompressablePacket {
 		}
 	}
 
+	@Override
 	public void decompress() {
 		if (compressed && hasData) {
 			Inflater decompressor = new Inflater();
@@ -161,14 +155,16 @@ public class PacketCustomBlockChunkOverride implements CompressablePacket {
 		}
 	}
 
+	@Override
 	public boolean isCompressed() {
 		return compressed;
 	}
 }
 
 class LightingThread extends Thread {
-	final LinkedBlockingDeque<LightingData> queue = new LinkedBlockingDeque<LightingData>();
+	final LinkedBlockingQueue<LightingData> queue = new LinkedBlockingQueue<LightingData>();
 	final int[] lightingBlockList = new int[32768 * 4];
+
 	LightingThread() {
 		super("Lighting Thread");
 		setDaemon(true);
@@ -198,7 +194,7 @@ class LightingThread extends Thread {
 		}
 	}
 
-	static class LightingData{
+	static class LightingData {
 		final int cx, cz;
 		final short[] ids;
 		LightingData(int cx, int cz, short[] ids) {

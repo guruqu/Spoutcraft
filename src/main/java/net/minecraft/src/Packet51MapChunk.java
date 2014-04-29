@@ -8,7 +8,7 @@ import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 import org.spoutcraft.client.SpoutClient;
-import org.spoutcraft.client.packet.builtin.PacketCustomBlockChunkOverride;
+import org.spoutcraft.client.packet.builtin.PacketOverrideChunk;
 
 public class Packet51MapChunk extends Packet {
 
@@ -113,7 +113,7 @@ public class Packet51MapChunk extends Packet {
 			var4.end();
 		}
 
-		SpoutClient.getInstance().getPacketManager().sendSpoutPacket(new PacketCustomBlockChunkOverride(xCh, zCh));
+		SpoutClient.getInstance().getPacketManager().sendSpoutPacket(new PacketOverrideChunk(xCh, zCh));
 		// Spout End
 	}
 

@@ -22,34 +22,32 @@ package org.spoutcraft.client.packet.builtin;
 import java.io.IOException;
 
 import net.minecraft.src.AbstractClientPlayer;
-
 import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.player.SpoutPlayer;
-import org.spoutcraft.client.SpoutClient;
 
-public class PacketSkinURL extends SpoutPacket {
+public class PacketPlayerTexture extends SpoutPacket {
 	public int entityId;
 	public String skinURL;
 	public String cloakURL;
 	public boolean release = true;
 
-	protected PacketDownloadTextureHTTP() {
+	protected PacketPlayerTexture() {
 	}
 
-	public PacketDownloadTextureHTTP(int id, String skinURL, String cloakURL) {
+	public PacketPlayerTexture(int id, String skinURL, String cloakURL) {
 		this.entityId = id;
 		this.skinURL = skinURL;
 		this.cloakURL = cloakURL;
 		release = false;
 	}
 
-	public PacketDownloadTextureHTTP(int id, String skinURL) {
+	public PacketPlayerTexture(int id, String skinURL) {
 		this.entityId = id;
 		this.skinURL = skinURL;
 		this.cloakURL = "none";
 	}
 
-	public PacketDownloadTextureHTTP(String cloakURL, int id) {
+	public PacketPlayerTexture(String cloakURL, int id) {
 		this.entityId = id;
 		this.skinURL = "none";
 		this.cloakURL = cloakURL;
@@ -72,34 +70,28 @@ public class PacketSkinURL extends SpoutPacket {
 	}
 
 	public void handle(SpoutPlayer player) {
-		AbstractClientPlayer e = SpoutClient.getInstance().getAbstractPlayerFromId(entityId);
-		if (e != null) {
-			// Check if these are the Minecraft skin/cape, if so, use defaults instead
-			String mcSkin = "http://s3.amazonaws.com/MinecraftSkins/" + e.username + ".png";
-			String mcCape = "http://s3.amazonaws.com/MinecraftCloaks/" + e.username + ".png";
-			if (!"none".equals(this.skinURL)) {
-				//System.out.println(e.username + " is going to be sent skinURL: " + skinURL + " from SpoutPlugin's API.");
-			}
-			if (this.skinURL.equalsIgnoreCase(mcSkin)) {
-				this.skinURL = "http://cdn.spout.org/game/vanilla/skin/" + e.username + ".png";
-			}
-			if (this.cloakURL.equalsIgnoreCase(mcCape)) {
-				if (e.vip != null && e.vip.getCape() != null) {
-					this.cloakURL = e.vip.getCape();
-				} else {
-					this.cloakURL = "http://cdn.spout.org/game/vanilla/cape/" + e.username + ".png";
-				}
-			}
-
-			if (!"none".equals(this.skinURL)) {
-				e.customSkinUrl = this.skinURL;
-			}
-			if (!"none".equals(this.cloakURL)) {
-				e.customCapeUrl = this.cloakURL;
-			}
-
-			e.setupCustomSkin();
-
+		// Check if these are the Minecraft skin/cape, if so, use defaults instead
+		String mcSkin = "http://s3.amazonaws.com/MinecraftSkins/" + player.getName() + ".png";
+		String mcCape = "http://s3.amazonaws.com/MinecraftCloaks/" + player.getName() + ".png";
+		if (!"none".equals(this.skinURL)) {
+			//System.out.println(e.username + " is going to be sent skinURL: " + skinURL + " from SpoutPlugin's API.");
 		}
+		if (this.skinURL.equalsIgnoreCase(mcSkin)) {
+			this.skinURL = "http://cdn.spout.org/game/vanilla/skin/" + player.getName() + ".png";
+		}
+		if (this.cloakURL.equalsIgnoreCase(mcCape)) {
+			if (player.getMCPlayer().vip != null && player.getMCPlayer().vip.getCape() != null) {
+				this.cloakURL = player.getMCPlayer().vip .getCape();
+			} else {
+				this.cloakURL = "http://cdn.spout.org/game/vanilla/cape/" + player.getName() + ".png";
+			}
+		}
+		if (!"none".equals(this.skinURL)) {
+			((AbstractClientPlayer) player.getMCPlayer()).customSkinUrl = this.skinURL;
+		}
+		if (!"none".equals(this.cloakURL)) {
+			((AbstractClientPlayer) player.getMCPlayer()).customCapeUrl = this.cloakURL;
+		}
+		((AbstractClientPlayer) player.getMCPlayer()).setupCustomSkin();
 	}
 }
