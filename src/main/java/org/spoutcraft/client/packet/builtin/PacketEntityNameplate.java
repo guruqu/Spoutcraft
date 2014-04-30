@@ -35,7 +35,7 @@ public class PacketEntityNameplate extends SpoutPacket {
 	public String title;
 	public int entityId;
 
-	protected PacketEntityTitle() {
+	protected PacketEntityNameplate() {
 	}
 
 	public PacketEntityNameplate(int entityId, String title) {

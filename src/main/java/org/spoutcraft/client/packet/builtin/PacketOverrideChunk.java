@@ -120,7 +120,7 @@ public class PacketOverrideChunk extends CompressiblePacket {
 				deflater.finish();
 				final ExpandableByteBuffer buf = new ExpandableByteBuffer(data.length);
 				while (!deflater.finished()) {
-					deflater.deflate()
+					deflater.deflate();
 					int bytesCompressed = deflater.deflate(buffer);
 					bos.write(buffer, 0, bytesCompressed);
 				}
