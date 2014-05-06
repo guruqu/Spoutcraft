@@ -101,7 +101,7 @@ public abstract class GenericWidget extends PropertyObject implements Widget {
 		return anchor;
 	}
 
-	public void encode(SpoutInputStream input) throws IOException {
+	public void decode(SpoutInputStream input) throws IOException {
 		setX(input.readInt());
 		setY(input.readInt());
 		setWidth(input.readInt());
@@ -119,7 +119,7 @@ public abstract class GenericWidget extends PropertyObject implements Widget {
 		animCount = input.readShort();
 	}
 
-	public void decode(SpoutOutputStream output) throws IOException {
+	public void encode(SpoutOutputStream output) throws IOException {
 		output.writeInt(getX());
 		output.writeInt(getY());
 		output.writeInt((int) getActualWidth());
