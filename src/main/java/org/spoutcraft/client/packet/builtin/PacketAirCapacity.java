@@ -50,7 +50,7 @@ public class PacketAirCapacity extends SpoutPacket {
 	}
 
 	public void handle(SpoutPlayer player) {
-		SpoutClient.getInstance().getActivePlayer().setMaximumAir(airTime);
-		SpoutClient.getInstance().getActivePlayer().setRemainingAir(air);
+		player.setMaximumAir(airTime);
+		player.setRemainingAir(air);
 	}	
 }

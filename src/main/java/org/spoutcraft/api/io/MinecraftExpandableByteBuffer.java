@@ -18,11 +18,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.spoutcraft.api.io;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import net.minecraft.src.NBTBase;
+import net.minecraft.src.NBTTagCompound;
+import net.minecraft.src.NBTTagEnd;
 import org.spoutcraft.api.Spoutcraft;
+import org.spoutcraft.api.gui.Color;
 import org.spoutcraft.api.inventory.ItemStack;
 import org.spoutcraft.api.util.FixedLocation;
 import org.spoutcraft.api.util.FixedVector;
@@ -176,8 +190,8 @@ public class MinecraftExpandableByteBuffer extends ExpandableByteBuffer {
 		final ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
 
 		try (DataOutputStream dataoutputstream = new DataOutputStream(new GZIPOutputStream(bytearrayoutputstream))) {
-			dataoutputstream.writeByte(base.getTypeId());
-			if (base.getTypeId() != 0) {
+			dataoutputstream.writeByte(base.getId());
+			if (base.getId() != 0) {
 				dataoutputstream.writeUTF("");
 
 				final Method nbtWrite = base.getClass().getDeclaredMethod("write", new Class[] {DataOutput.class});
@@ -186,8 +200,6 @@ public class MinecraftExpandableByteBuffer extends ExpandableByteBuffer {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			dataoutputstream.close();
 		}
 
 		return bytearrayoutputstream.toByteArray();
@@ -201,7 +213,7 @@ public class MinecraftExpandableByteBuffer extends ExpandableByteBuffer {
 			}
 			getUTF8();
 			// TODO: Check this
-			NBTBase found = NBTBase.createTag(typeId, "");
+			NBTBase found = NBTBase.newTag(typeId, "");
 			if (found == null) {
 				throw new IOException("NBTTag sent from client does not exist on this server (hack?)!");
 			}

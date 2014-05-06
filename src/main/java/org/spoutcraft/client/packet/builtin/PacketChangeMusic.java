@@ -26,9 +26,9 @@ import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
 public class PacketChangeMusic extends SpoutPacket {
-	public int id;
-	public int volumePercent;
-	public boolean cancel = false;
+	private int id;
+	private int volumePercent;
+	private boolean cancel = false;
 
 	protected PacketChangeMusic() {
 	}
@@ -36,10 +36,6 @@ public class PacketChangeMusic extends SpoutPacket {
 	public PacketChangeMusic(int music, int volumePercent) {
 		this.id = music;
 		this.volumePercent = volumePercent;
-	}
-
-	public boolean isCancelled() {
-		return cancel;
 	}
 
 	@Override

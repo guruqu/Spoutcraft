@@ -27,6 +27,8 @@ import org.spoutcraft.api.material.Material;
 import org.spoutcraft.api.material.MaterialData;
 
 public class PacketChangeItemDisplayName extends SpoutPacket {
+	private static final String RESET_ALL = "[resetall]";
+	private static final String RESET = "[reset]";
 	private int id;
 	private short data;
 	private String name;
@@ -49,26 +51,24 @@ public class PacketChangeItemDisplayName extends SpoutPacket {
 
 	@Override
 	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
-		throw new IOException("The server should not receive a PacketChangeItemDisplayName from the client (hack?)!");
+		throw new IOException("The client should not receive a PacketChangeItemDisplayName from the server (out of date server?)!");
 	}
 
 	public void handle(SpoutPlayer player) {
+		if (RESET_ALL.equals(name)) {
+			MaterialData.reset();
+			return;
+		}
 		Material material = MaterialData.getOrCreateMaterial(id, data);
 		if (material == null) {
 			material = MaterialData.getCustomItem(data);
 		}
-		if (name.equals("[resetall]")) {
-			MaterialData.reset();
-		} 
 		if (material != null) {
-			if (name.equals("[reset]")) {
+			if (RESET.equals(name)) {
 				material.setName(material.getNotchianName());
 			} else {
 				material.setName(name);
 			}
-		} else {
-			// Debug Client Code
-			//System.out.println("Tried to set item name to [" + name + "] for unknown material (" + id + ", " + data + ")");
 		}
 	}
 }

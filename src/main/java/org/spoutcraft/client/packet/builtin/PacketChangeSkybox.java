@@ -33,7 +33,7 @@ public class PacketChangeSkybox extends SpoutPacket {
 	String sun = "";
 	String moon = "";
 
-	public PacketChangeSkybox() {
+	protected PacketChangeSkybox() {
 	}
 
 	public PacketChangeSkybox(int cloudY, int stars, int sunPercent, int moonPercent, Color skyColor) {

@@ -21,16 +21,17 @@ package org.spoutcraft.client.packet.builtin;
 
 import java.io.IOException;
 
+import org.spoutcraft.api.block.design.BlockDesign;
 import org.spoutcraft.api.block.design.GenericBlockDesign;
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.api.material.CustomBlock;
 import org.spoutcraft.api.material.MaterialData;
+import org.spoutcraft.client.player.SpoutPlayer;
 
 public class PacketBlockModel extends SpoutPacket {
 	private short customId;
 	private byte data;
-	private GenericBlockDesign design;
+	private BlockDesign design;
 
 	protected PacketBlockModel() {
 	}

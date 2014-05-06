@@ -78,6 +78,20 @@ public class PacketBlockData extends CompressiblePacket {
 
 	@Override
 	public void handle(SpoutPlayer player) {
+		if (data != null) {
+			for (int i = 0; i < data.length / 15; i++) {
+				int index = i * 15;
+				int id = result.get(index);
+				short rawData = result.get(index+1);
+				Block block = MaterialData.getBlock(id, rawData);
+				if (block != null) {
+					block.setHardness(result.getFloat(index+2));
+					block.setLightLevel(result.getInt(index+6));
+					block.setFriction(result.getFloat(index+10));
+					block.setOpaque(result.get(index+14) != 0);
+				}
+			}
+		}
 	}
 
 	public void compress() {
@@ -131,22 +145,4 @@ public class PacketBlockData extends CompressiblePacket {
 	public boolean isCompressed() {
 		return compressed || (data == null || data.length < 256);
 	}
-
-	public void handle(SpoutPlayer player) {
-		if (data != null) {
-			ByteBuffer result = ByteBuffer.allocate(data.length).put(data);
-			for (int i = 0; i < data.length / 15; i++) {
-				int index = i * 15;
-				int id = result.get(index);
-				short rawData = result.get(index+1);
-				Block block = MaterialData.getBlock(id, rawData);
-				if (block != null) {
-					block.setHardness(result.getFloat(index+2));
-					block.setLightLevel(result.getInt(index+6));
-					block.setFriction(result.getFloat(index+10));
-					block.setOpaque(result.get(index+14) != 0);
-				}
-			}
-		}
-	}	
 }
