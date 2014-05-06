@@ -24,6 +24,7 @@ import java.util.UUID;
 
 import org.spoutcraft.api.Spoutcraft;
 import org.spoutcraft.api.UnsafeClass;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.api.io.SpoutInputStream;
 import org.spoutcraft.api.io.SpoutOutputStream;
 import org.spoutcraft.api.property.Property;
@@ -101,7 +102,7 @@ public abstract class GenericWidget extends PropertyObject implements Widget {
 		return anchor;
 	}
 
-	public void decode(SpoutInputStream input) throws IOException {
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
 		setX(input.readInt());
 		setY(input.readInt());
 		setWidth(input.readInt());
@@ -119,7 +120,7 @@ public abstract class GenericWidget extends PropertyObject implements Widget {
 		animCount = input.readShort();
 	}
 
-	public void encode(SpoutOutputStream output) throws IOException {
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
 		output.writeInt(getX());
 		output.writeInt(getY());
 		output.writeInt((int) getActualWidth());
