@@ -32,8 +32,8 @@ import org.spoutcraft.client.SpoutcraftWorld;
 import org.spoutcraft.client.entity.CraftLivingEntity;
 
 public class PacketEntityNameplate extends SpoutPacket {
-	public String title;
-	public int entityId;
+	private String title;
+	private int entityId;
 
 	protected PacketEntityNameplate() {
 	}
@@ -62,18 +62,18 @@ public class PacketEntityNameplate extends SpoutPacket {
 			CraftLivingEntity living = (CraftLivingEntity)e.spoutEnty;
 			// Check to see if this title is our username, if so, use defaults
 			if (e instanceof EntityPlayer) {
-				EntityPlayer player = (EntityPlayer)e;
-				if (player.vip != null && title.equals(player.username)) {
-					title = player.vip.getTitle();
+				EntityPlayer entity = (EntityPlayer)e;
+				if (entity.vip != null && title.equals(entity.username)) {
+					title = entity.vip.getTitle();
 				}
 			}
 			if (title.equals("reset")) {
 				living.resetTitle();
-				SpoutcraftWorld spworld = (SpoutcraftWorld) living.getWorld();
+				SpoutcraftWorld spworld = living.getWorld();
 				spworld.getHandle().customTitles.remove(entityId);
 			} else {
 				living.setTitle(title);
-				SpoutcraftWorld spworld = (SpoutcraftWorld) living.getWorld();
+				SpoutcraftWorld spworld = living.getWorld();
 				spworld.getHandle().customTitles.put(living.getEntityId(), title);
 			}
 		}

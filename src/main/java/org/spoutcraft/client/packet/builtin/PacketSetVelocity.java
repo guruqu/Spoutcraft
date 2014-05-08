@@ -59,7 +59,7 @@ public class PacketSetVelocity extends SpoutPacket {
 		buf.putDouble(motZ);
 	}
 
-	@Override	
+	@Override
 	public void handle(SpoutPlayer player) {
 		Entity e = SpoutClient.getInstance().getEntityFromId(entityId);
 		if (e != null && !Double.isNaN(motX) && !Double.isNaN(motY) && !Double.isNaN(motZ)) {

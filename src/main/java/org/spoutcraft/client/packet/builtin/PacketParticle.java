@@ -31,11 +31,11 @@ import org.spoutcraft.api.util.Location;
 import org.spoutcraft.api.util.Vector;
 
 public class PacketParticle extends SpoutPacket {
-	String name;
-	Location location;
-	Vector motion;
-	float scale, gravity, particleRed, particleBlue, particleGreen;
-	int maxAge, amount;
+	private String name;
+	private Location location;
+	private Vector motion;
+	private float scale, gravity, particleRed, particleBlue, particleGreen;
+	private int maxAge, amount;
 
 	protected PacketParticle() {
 	}
@@ -60,9 +60,8 @@ public class PacketParticle extends SpoutPacket {
 
 	@Override
 	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
-		throw new IOException("The client should not send a PacketDownloadFile from the client (hack?)!");
+		throw new IOException("The client should not send a PacketDownloadFile to the server (hack?)!");
 	}
-
 
 	@Override
 	public void handle(SpoutPlayer player) {

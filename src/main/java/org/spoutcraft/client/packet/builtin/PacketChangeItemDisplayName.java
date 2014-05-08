@@ -54,6 +54,7 @@ public class PacketChangeItemDisplayName extends SpoutPacket {
 		throw new IOException("The client should not receive a PacketChangeItemDisplayName from the server (out of date server?)!");
 	}
 
+	@Override
 	public void handle(SpoutPlayer player) {
 		if (RESET_ALL.equals(name)) {
 			MaterialData.reset();

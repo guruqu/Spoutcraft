@@ -28,11 +28,10 @@ import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.player.SpoutPlayer;
 
 public class PacketControlAction extends SpoutPacket {
-	protected UUID screen;
-	protected UUID widget;
-	protected float state;
-	protected String data = "";
-
+	private UUID screen;
+	private UUID widget;
+	private float state;
+	private String data = "";
 
 	protected PacketControlAction() {
 	}
@@ -66,6 +65,7 @@ public class PacketControlAction extends SpoutPacket {
 		buf.putUTF8(data);
 	}
 
+	@Override
 	public void handle(SpoutPlayer player) {
 		// Nothing to do
 	}

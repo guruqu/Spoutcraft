@@ -79,6 +79,7 @@ public class PacketBlockData extends CompressiblePacket {
 	@Override
 	public void handle(SpoutPlayer player) {
 		if (data != null) {
+			ByteBuffer result = ByteBuffer.allocate(data.length).put(data);
 			for (int i = 0; i < data.length / 15; i++) {
 				int index = i * 15;
 				int id = result.get(index);

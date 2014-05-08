@@ -27,7 +27,7 @@ import org.spoutcraft.client.player.SpoutPlayer;
 public class PacketDeleteFile extends SpoutPacket {
 	private String plugin;
 	private String fileName;
-	
+
 	protected PacketDeleteFile() {
 	}
 
@@ -44,7 +44,7 @@ public class PacketDeleteFile extends SpoutPacket {
 
 	@Override
 	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
-		throw new IOException("The client should not send a PacketDeleteFile from the client (hack?)!");		
+		throw new IOException("The client should not send a PacketDeleteFile to the server (hack?)!");
 	}
 
 	@Override

@@ -68,5 +68,5 @@ public class PacketAccessory extends SpoutPacket{
 		} else {
 			AccessoryHandler.removeAccessoryType(who, type);
 		}
-	}	
+	}
 }

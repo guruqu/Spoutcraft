@@ -23,12 +23,13 @@ import java.io.IOException;
 
 import org.spoutcraft.api.gui.ScreenType;
 import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.packet.ScreenAction;
 import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
 public class PacketScreenAction extends SpoutPacket {
-	protected byte action = -1;
-	protected byte screen = -1; // UnknownScreen
+	private byte action = -1;
+	private byte screen = -1; // UnknownScreen
 
 	protected PacketScreenAction() {
 	}

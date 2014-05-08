@@ -30,48 +30,36 @@ import org.spoutcraft.api.player.RenderDistance;
 import org.spoutcraft.client.SpoutClient;
 
 public class PacketChangeRenderDistance extends SpoutPacket {
-	protected byte view = -1;
-	protected byte max = -1;
-	protected byte min = -1;
-	
+	private byte view = -1;
+	private byte max = -1;
+	private byte min = -1;
+
 	protected PacketChangeRenderDistance() {
 	}
 
-	public PacketChangeRenderDistance(boolean resetMax, boolean resetMin) {
-		if (resetMax) {
-			max = RenderDistance.RESET;
-		}
-		if (resetMin) {
-			min = RenderDistance.RESET;
-		}
+	public PacketChangeRenderDistance(byte view) {
+		this.view = view;
 	}
 
-	public PacketChangeRenderDistance(RenderDistance distance, RenderDistance max, RenderDistance min) {
-		if (distance != null) {
-			this.distance = distance;
-		}
-		if (max != null) {
-			this.max = max;
-		}
-		if (min != null) {
-			this.min = min;
-		}
+	public int getNumBytes() {
+		return 3;
 	}
 
 	@Override
 	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
-		distance = RenderDistance.get(buf.get());
-		max = RenderDistance.get(buf.get());
-		min = RenderDistance.get(buf.get());
+		view = buf.get();
+		max = buf.get();
+		min = buf.get();
 	}
 
 	@Override
 	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
-		buf.put(distance.getValue());
-		buf.put(max.getValue());
-		buf.put(min.getValue());
+		buf.put(view);
+		buf.put(max);
+		buf.put(min);
 	}
 
+	@Override
 	public void handle(SpoutPlayer player) {
 		Minecraft game = SpoutClient.getHandle();
 		if (game != null) {

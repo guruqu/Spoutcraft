@@ -22,12 +22,11 @@ package org.spoutcraft.client.packet.builtin;
 import java.io.IOException;
 
 import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
-import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.player.SpoutPlayer;
 
 public class PacketAirCapacity extends SpoutPacket {
-	public int airTime;
-	public int air;
+	private int airTime;
+	private int air;
 
 	protected PacketAirCapacity() {
 	}
@@ -49,8 +48,9 @@ public class PacketAirCapacity extends SpoutPacket {
 		buf.putInt(this.air);
 	}
 
+	@Override
 	public void handle(SpoutPlayer player) {
 		player.setMaximumAir(airTime);
 		player.setRemainingAir(air);
-	}	
+	}
 }

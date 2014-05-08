@@ -19,44 +19,47 @@
  */
 package org.spoutcraft.client.packet.builtin;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
-import org.apache.commons.io.output.ByteArrayOutputStream;
-
 import org.spoutcraft.api.Spoutcraft;
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.block.SpoutcraftChunk;
+import org.spoutcraft.client.player.SpoutPlayer;
 
-public class PacketCustomMultiBlockOverride implements CompressablePacket {
+public class PacketCustomMultiBlockOverride extends CompressiblePacket {
 	private int chunkX;
 	private int chunkZ;
 	private boolean compressed = true;
 	private byte[] data;
-	public PacketCustomMultiBlockOverride() {
+
+	protected PacketCustomMultiBlockOverride() {
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		chunkX = input.readInt();
-		chunkZ = input.readInt();
-		int size = input.readInt();
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		chunkX = buf.getInt();
+		chunkZ = buf.getInt();
+		int size = buf.getInt();
 		data = new byte[size];
-		input.read(data);
+		buf.get(data);
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeInt(chunkX);
-		output.writeInt(chunkZ);
-		output.writeInt(data.length);
-		output.write(data);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putInt(chunkX);
+		buf.putInt(chunkZ);
+		buf.putInt(data.length);
+		buf.put(data);
 	}
 
-	public void run(int playerId) {
+	@Override
+	public void handle(SpoutPlayer player) {
 		ByteBuffer result = ByteBuffer.allocate(data.length).put(data);
 		SpoutcraftChunk chunk = Spoutcraft.getChunk(SpoutClient.getInstance().getRawWorld(), chunkX, chunkZ);
 		for (int i = 0; i < data.length / 7; i++) {
@@ -72,15 +75,8 @@ public class PacketCustomMultiBlockOverride implements CompressablePacket {
 		}
 	}
 
-	public void failure(int playerId) {
-	}
-
-	public PacketType getPacketType() {
-		return PacketType.PacketCustomMultiBlockOverride;
-	}
-
 	public int getVersion() {
-		return 4;
+		return 0;
 	}
 
 	public void compress() {
@@ -119,12 +115,12 @@ public class PacketCustomMultiBlockOverride implements CompressablePacket {
 				try {
 					int count = decompressor.inflate(buf);
 					bos.write(buf, 0, count);
-				} catch (DataFormatException e) {
+				} catch (DataFormatException ignored) {
 				}
 			}
 			try {
 				bos.close();
-			} catch (IOException e) {
+			} catch (IOException ignored) {
 			}
 			compressed = false;
 			data = bos.toByteArray();

@@ -91,7 +91,7 @@ public class MinecraftExpandableByteBuffer extends ExpandableByteBuffer {
 		putDouble(vector.getZ());
 	}
 
-	public FixedVector getVector() {
+	public MutableVector getVector() {
 		return new MutableVector(getDouble(), getDouble(), getDouble());
 	}
 

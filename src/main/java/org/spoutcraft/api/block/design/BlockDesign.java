@@ -22,6 +22,7 @@ package org.spoutcraft.api.block.design;
 import java.io.IOException;
 import java.util.Random;
 
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.api.io.SpoutInputStream;
 import org.spoutcraft.api.material.Block;
 import org.spoutcraft.api.util.Vector;
@@ -75,10 +76,10 @@ public interface BlockDesign {
 
 	/**
 	 * Inflates this design with data from a packet.
-	 * @param input
+	 * @param buf
 	 * @throws IOException
 	 */
-	public void read(SpoutInputStream input) throws IOException;
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException;
 
 	/**
 	 * Sets the specified Texture for this BlockDesign
@@ -143,7 +144,6 @@ public interface BlockDesign {
 	/**
 	 * Sets the specified quad or face
 	 *
-	 * @param number of the quad to set
 	 * @param quad to set there
 	 * @return this
 	 */
@@ -187,7 +187,7 @@ public interface BlockDesign {
 
 	/**
 	 * True if this design has been reset.
-	 * @return
+	 * @return boolean
 	 */
 	public boolean isReset();
 
@@ -231,7 +231,7 @@ public interface BlockDesign {
 
 	/**
 	 * Renders this design as an item in the world
-	 * @param block material being rendered
+	 * @param item material being rendered
 	 */
 	public boolean renderItemstack(net.minecraft.src.ItemStack item, float x, float y, float depth, float rotation, float scale, Random rand);
 

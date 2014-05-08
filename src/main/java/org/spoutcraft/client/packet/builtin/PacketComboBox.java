@@ -34,7 +34,7 @@ public class PacketComboBox extends SpoutPacket {
 	private boolean open;
 	private int selection;
 
-	public PacketComboBox() {
+	protected PacketComboBox() {
 	}
 
 	public PacketComboBox(GenericComboBox box) {

@@ -32,10 +32,10 @@ import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
 public class PacketScreenshot extends SpoutPacket {
-	byte[] ssAsPng = null;
-	boolean isRequest = false;
+	private byte[] ssAsPng = null;
+	private boolean isRequest = false;
 
-	public PacketScreenshot() {
+	protected PacketScreenshot() {
 		isRequest = true;
 	}
 
@@ -75,6 +75,7 @@ public class PacketScreenshot extends SpoutPacket {
 		}
 	}
 
+	@Override
 	public void handle(SpoutPlayer player) {
 		if (!isRequest) {
 			return; // we can't do anything!
@@ -83,7 +84,7 @@ public class PacketScreenshot extends SpoutPacket {
 			SpoutClient.getInstance().getActivePlayer().showAchievement("Sending screenshot...", "Screenshot requested", 321);
 			BufferedImage screenshot = ScreenShotHelper.getScreenshot(Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
 			PacketScreenshot packet = new PacketScreenshot(screenshot);
-			SpoutClient.getInstance().getPacketManager().sendSpoutPacket(packet);
+			SpoutClient.getInstance().getPacketManager().sendSpoutPacket(packet); // TODO: Fix this
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 			SpoutClient.getInstance().getActivePlayer().showAchievement("Sending screenshot...", "Failed!", 321);

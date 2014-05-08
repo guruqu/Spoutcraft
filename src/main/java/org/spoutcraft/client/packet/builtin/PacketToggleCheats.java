@@ -91,7 +91,7 @@ public class PacketToggleCheats extends SpoutPacket {
 		cheatvoidfog = buf.getBoolean();
 		forcevoidfog = buf.getBoolean();
 		showvoidfog = buf.getBoolean();
-		flightspeed = buf.getBoolean();		
+		flightspeed = buf.getBoolean();
 	}
 
 	@Override
@@ -101,6 +101,6 @@ public class PacketToggleCheats extends SpoutPacket {
 
 	@Override
 	public void handle(SpoutPlayer player) {
-		SpoutClient.getInstance().setVisualCheats(cheatsky, forcesky, showsky, cheatclearwater, forceclearwater, showclearwater, cheatstars, forcestars, showstars, cheatweather, forceweather, showweather, time, coords, entitylabel, cheatvoidfog, forcevoidfog, showvoidfog, flyspeed);
-	}	
+		SpoutClient.getInstance().setVisualCheats(cheatsky, forcesky, showsky, cheatclearwater, forceclearwater, showclearwater, cheatstars, forcestars, showstars, cheatweather, forceweather, showweather, time, coords, entitylabel, cheatvoidfog, forcevoidfog, showvoidfog, flightspeed);
+	}
 }

@@ -73,7 +73,7 @@ public class PacketEntityInformation extends CompressiblePacket {
 			buf.putInt(0);
 		}
 		buf.putBoolean(compressed);
-	}	
+	}
 
 	@Override
 	public void compress() {
@@ -130,8 +130,9 @@ public class PacketEntityInformation extends CompressiblePacket {
 		return compressed;
 	}
 
+	@Override
 	public void handle(SpoutPlayer player) {
-		if (Minecraft.getMinecraft().theWorld instanceof WorldClient) {
+		if (Minecraft.getMinecraft().theWorld != null) {
 			ByteBuffer rawData = ByteBuffer.allocate(data.length);
 			rawData.put(data);
 			for (int i = 0; i < data.length / 20; i++) {

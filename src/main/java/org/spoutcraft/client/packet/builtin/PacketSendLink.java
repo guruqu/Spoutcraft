@@ -30,20 +30,20 @@ import java.net.URL;
 
 
 public class PacketSendLink extends SpoutPacket {
-	protected URL link;
+	private URL link;
 
-	public PacketSendLink() {
+	protected PacketSendLink() {
 		link = null;
 	}
 
 	@Override
 	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
-		link = buf.getUTF8();		
+		link = new URL(buf.getUTF8());
 	}
 
 	@Override
 	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
-		throw new IOException("The client cannot send a link from the server!");
+		throw new IOException("The client cannot send a link to the server!");
 	}
 
 	@Override
@@ -51,7 +51,8 @@ public class PacketSendLink extends SpoutPacket {
 		if (link != null) {
 			try {
 				Minecraft.getMinecraft().displayGuiScreen(new GuiConfirmOpenLink(Minecraft.getMinecraft().currentScreen, link.toString(), 0, false));
-			} catch (Exception e) { }
+			} catch (Exception ignored) {
+			}
 		}
 	}
 }

@@ -31,14 +31,14 @@ import org.spoutcraft.client.io.Download;
 import org.spoutcraft.client.io.FileDownloadThread;
 import org.spoutcraft.client.io.FileUtil;
 
-public class PacketPreCacheFile extends SpoutPacket {	
+public class PacketPreCacheFile extends SpoutPacket {
 	private boolean cached = false;
 	private boolean url = false;
 	private long expectedCRC;
 	private String file;
 	private String plugin;
 
-	public PacketPreCacheFile() {
+	protected PacketPreCacheFile() {
 	}
 
 	public PacketPreCacheFile(String plugin, String file, long expectedCRC, boolean url) {
@@ -88,7 +88,7 @@ public class PacketPreCacheFile extends SpoutPacket {
 			}
 			// Request copy of file
 			if (!url) {
-				SpoutClient.getInstance().getPacketManager().sendSpoutPacket(this);
+				SpoutClient.getInstance().getPacketManager().sendSpoutPacket(this); // TODO: Fix this
 			} else { // Begin download
 				Runnable queued = null;
 				if (FileUtil.isImageFile(fileName)) {

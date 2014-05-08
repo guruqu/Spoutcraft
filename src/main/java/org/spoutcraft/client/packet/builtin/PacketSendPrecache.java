@@ -33,7 +33,7 @@ import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.precache.PrecacheManager;
 import org.spoutcraft.client.precache.PrecacheTuple;
 
-public class PacketSendPrecache extends CompressablePacket {
+public class PacketSendPrecache extends CompressiblePacket {
 	private byte[] fileData;
 	private String plugin;
 	private String version;
@@ -42,14 +42,12 @@ public class PacketSendPrecache extends CompressablePacket {
 	protected PacketSendPrecache() {
 	}
 
-	public PacketSendPrecache(Plugin plugin, File file) {
+	public PacketSendPrecache(File file) {
 		try {
 			this.fileData = FileUtils.readFileToByteArray(file);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		this.plugin = plugin.getDescription().getName();
-		this.version = plugin.getDescription().getVersion();
 	}
 
 	@Override

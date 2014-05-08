@@ -27,7 +27,10 @@ import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.gui.ScreenUtil;
 
 public class PacketOpenScreen extends SpoutPacket {
-	ScreenType type = null;
+	private ScreenType type = null;
+
+	protected PacketOpenScreen() {
+	}
 
 	public PacketOpenScreen(ScreenType type) {
 		this.type = type;

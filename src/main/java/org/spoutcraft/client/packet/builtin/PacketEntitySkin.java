@@ -28,9 +28,9 @@ import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.entity.CraftEntity;
 
 public class PacketEntitySkin extends SpoutPacket {
-	protected String texture = "";
-	protected int entityId;
-	protected byte textureId = 0;
+	private String texture = "";
+	private int entityId;
+	private byte textureId = 0;
 
 	protected PacketEntitySkin() {
 	}
@@ -60,7 +60,7 @@ public class PacketEntitySkin extends SpoutPacket {
 		if (texture.equals("[reset]")) {
 			texture = null;
 		}
-		CraftEntity entity = Spoutcraft.getWorld().getEntityFromId(entityId);
+		final CraftEntity entity = Spoutcraft.getWorld().getEntityFromId(entityId);
 		if (entity != null) {
 			entity.setSkin(texture, EntitySkinType.getType(textureId));
 		}

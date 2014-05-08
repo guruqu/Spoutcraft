@@ -78,5 +78,5 @@ public class PacketWaypoint extends SpoutPacket {
 			point.deathpoint = true;
 			MinimapConfig.getInstance().addWaypoint(point);
 		}
-	}	
+	}
 }

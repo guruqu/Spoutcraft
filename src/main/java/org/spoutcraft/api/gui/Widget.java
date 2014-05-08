@@ -23,12 +23,13 @@ import java.io.IOException;
 import java.util.UUID;
 
 import org.spoutcraft.api.UnsafeClass;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.api.io.SpoutInputStream;
 import org.spoutcraft.api.io.SpoutOutputStream;
 import org.spoutcraft.api.property.PropertyInterface;
 
 @UnsafeClass
-public interface Widget extends PropertyInterface{
+public interface Widget extends PropertyInterface { // TODO: Update for MEBB
 	/**
 	 * Is this running on Spoutcraft (ie, not on the server) - declared final in GenericWidget!
 	 * @return if it's running on a client
@@ -55,19 +56,18 @@ public interface Widget extends PropertyInterface{
 
 	/**
 	 * Called after this widget this created for serialization.
-	 * @param input
+	 * @param buf
 	 * @throws IOException
 	 */
-	public void readData(SpoutInputStream input) throws IOException;
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException;
 
 	/**
 	 * Called when this widget is serialized to the client.
 	 *
-	 * Note: ensure that any changes here are reflected in {@link getNumBytes()} and are also present on the client.
-	 * @param output
+	 * @param buf
 	 * @throws IOException
 	 */
-	public void writeData(SpoutOutputStream output) throws IOException;
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException;
 
 	/**
 	 * Gets the plugin that attached this widget to the screen, or null if this screen is unattached.
@@ -77,7 +77,7 @@ public interface Widget extends PropertyInterface{
 
 	/**
 	 * Internal use only.
-	 * @param plugin
+	 * @param addon
 	 * @return this
 	 */
 	public Widget setAddon(String addon);
@@ -149,7 +149,7 @@ public interface Widget extends PropertyInterface{
 	/**
 	 * Sets the screen and plugin this widget is attached to. Should not be used normally, is handled with screen.attachWidget() is called.
 	 * @param screen this is attached to
-	 * @param plugin this is attached to
+	 * @param addon this is attached to
 	 * @return widget
 	 */
 	public Widget setScreen(String addon, Screen screen);
@@ -300,21 +300,21 @@ public interface Widget extends PropertyInterface{
 
 	/**
 	 * Container Layout - Padding to use for automatic container layout - not included in dimensions
-	 * @param marginLeft
+	 * @param marginTop
 	 * @return
 	 */
 	public Widget setMarginTop(int marginTop);
 
 	/**
 	 * Container Layout - Padding to use for automatic container layout - not included in dimensions
-	 * @param marginLeft
+	 * @param marginRight
 	 * @return
 	 */
 	public Widget setMarginRight(int marginRight);
 
 	/**
 	 * Container Layout - Padding to use for automatic container layout - not included in dimensions
-	 * @param marginLeft
+	 * @param marginBottom
 	 * @return
 	 */
 	public Widget setMarginBottom(int marginBottom);
@@ -365,7 +365,7 @@ public interface Widget extends PropertyInterface{
 
 	/**
 	 * Container Layout - Set the maximum width for this widget
-	 * @param min
+	 * @param max
 	 * @return
 	 */
 	public Widget setMaxWidth(int max);
@@ -391,7 +391,7 @@ public interface Widget extends PropertyInterface{
 
 	/**
 	 * Container Layout - Set the maximum height for this widget
-	 * @param min
+	 * @param max
 	 * @return
 	 */
 	public Widget setMaxHeight(int max);

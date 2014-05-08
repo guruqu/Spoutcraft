@@ -27,6 +27,7 @@ import org.lwjgl.opengl.GL11;
 
 import org.spoutcraft.api.Spoutcraft;
 import org.spoutcraft.api.gui.MinecraftTessellator;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.api.io.SpoutInputStream;
 import org.spoutcraft.api.material.Block;
 import org.spoutcraft.api.packet.PacketUtil;
@@ -34,37 +35,28 @@ import org.spoutcraft.api.util.MutableIntegerVector;
 import org.spoutcraft.client.SpoutcraftWorld;
 
 public class GenericBlockDesign implements BlockDesign {
+	private static final String RESET_STRING = "[reset]";
 	protected boolean reset = false;
-
 	protected float lowXBound;
 	protected float lowYBound;
 	protected float lowZBound;
-
 	protected float highXBound;
 	protected float highYBound;
 	protected float highZBound;
-
 	protected String textureURL;
 	protected String textureAddon;
-
 	protected Texture texture;
-
 	protected float[][] xPos;
 	protected float[][] yPos;
 	protected float[][] zPos;
-
 	protected float[][] textXPos;
 	protected float[][] textYPos;
-
 	protected int[] lightSourceXOffset;
 	protected int[] lightSourceYOffset;
 	protected int[] lightSourceZOffset;
-
 	protected float maxBrightness = 1.0F;
 	protected float minBrightness = 0F;
-
 	protected float brightness = 0.5F;
-
 	protected int renderPass = 0;
 
 	public GenericBlockDesign() {
@@ -173,61 +165,32 @@ public class GenericBlockDesign implements BlockDesign {
 		return 3;
 	}
 
-	public void read(SpoutInputStream input) throws IOException {
-		textureURL = PacketUtil.readString(input);
-		if (textureURL.equals(resetString)) {
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		textureURL = buf.getUTF8();
+		if (textureURL.equals(RESET_STRING)) {
 			reset = true;
 			return;
 		}
 		reset = false;
-		textureAddon = PacketUtil.readString(input);
-		xPos = PacketUtil.readDoubleArray(input);
-		yPos = PacketUtil.readDoubleArray(input);
-		zPos = PacketUtil.readDoubleArray(input);
-		textXPos = PacketUtil.readDoubleArray(input);
-		textYPos = PacketUtil.readDoubleArray(input);
-		lowXBound = input.readFloat();
-		lowYBound = input.readFloat();
-		lowZBound = input.readFloat();
-		highXBound = input.readFloat();
-		highYBound = input.readFloat();
-		highZBound = input.readFloat();
-		maxBrightness = input.readFloat();
-		minBrightness = input.readFloat();
-		renderPass = input.readInt();
-		lightSourceXOffset = PacketUtil.readIntArray(input);
-		lightSourceYOffset = PacketUtil.readIntArray(input);
-		lightSourceZOffset = PacketUtil.readIntArray(input);
+		textureAddon = buf.getUTF8();
+		xPos = buf.get2DFloats();
+		yPos = buf.get2DFloats();
+		zPos = buf.get2DFloats();
+		textXPos = buf.get2DFloats();
+		textYPos = buf.get2DFloats();
+		lowXBound = buf.getFloat();
+		lowYBound = buf.getFloat();
+		lowZBound = buf.getFloat();
+		highXBound = buf.getFloat();
+		highYBound = buf.getFloat();
+		highZBound = buf.getFloat();
+		maxBrightness = buf.getFloat();
+		minBrightness = buf.getFloat();
+		renderPass = buf.getInt();
+		lightSourceXOffset = buf.getInts();
+		lightSourceYOffset = buf.getInts();
+		lightSourceZOffset = buf.getInts();
 	}
-
-	public void read(DataInputStream input) throws IOException {
-		textureURL = PacketUtil.readString(input);
-		if (textureURL.equals(resetString)) {
-			reset = true;
-			return;
-		}
-		reset = false;
-		textureAddon = PacketUtil.readString(input);
-		xPos = PacketUtil.readDoubleArray(input);
-		yPos = PacketUtil.readDoubleArray(input);
-		zPos = PacketUtil.readDoubleArray(input);
-		textXPos = PacketUtil.readDoubleArray(input);
-		textYPos = PacketUtil.readDoubleArray(input);
-		lowXBound = input.readFloat();
-		lowYBound = input.readFloat();
-		lowZBound = input.readFloat();
-		highXBound = input.readFloat();
-		highYBound = input.readFloat();
-		highZBound = input.readFloat();
-		maxBrightness = input.readFloat();
-		minBrightness = input.readFloat();
-		renderPass = input.readInt();
-		lightSourceXOffset = PacketUtil.readIntArray(input);
-		lightSourceYOffset = PacketUtil.readIntArray(input);
-		lightSourceZOffset = PacketUtil.readIntArray(input);
-	}
-
-	private final static String resetString = "[reset]";
 
 	public BlockDesign setTexture(String addon, String textureURL) {
 		this.textureAddon = addon;
@@ -305,8 +268,7 @@ public class GenericBlockDesign implements BlockDesign {
 	}
 
 	public MutableIntegerVector getLightSource(int quad, int x, int y, int z) {
-		MutableIntegerVector blockVector = new MutableIntegerVector(x + lightSourceXOffset[quad], y + lightSourceYOffset[quad], z + lightSourceZOffset[quad]);
-		return blockVector;
+		return new MutableIntegerVector(x + lightSourceXOffset[quad], y + lightSourceYOffset[quad], z + lightSourceZOffset[quad]);
 	}
 
 	public BlockDesign setTexture(String addon, Texture texture) {

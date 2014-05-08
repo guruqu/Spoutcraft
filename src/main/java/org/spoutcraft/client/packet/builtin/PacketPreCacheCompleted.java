@@ -43,9 +43,10 @@ public class PacketPreCacheCompleted extends SpoutPacket {
 	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
 	}
 
+	@Override
 	public void handle(SpoutPlayer player) {
 		FileDownloadThread.preCacheCompleted.set(System.currentTimeMillis());
-		SpoutClient.getInstance().getPacketManager().sendSpoutPacket(this);
+		SpoutClient.getInstance().getPacketManager().sendSpoutPacket(this); // TODO: Fix this later
 		if (!(SpoutClient.getHandle().currentScreen instanceof CustomScreen) && !(SpoutClient.getHandle().currentScreen instanceof GuiYesNo)) {
 			// Closes downloading terrain
 			SpoutClient.getHandle().displayGuiScreen(null, false);

@@ -22,6 +22,7 @@ package org.spoutcraft.client.packet.builtin;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.spoutcraft.api.gui.GenericWidget;
@@ -32,13 +33,20 @@ import org.spoutcraft.api.gui.Screen;
 import org.spoutcraft.api.gui.Widget;
 import org.spoutcraft.api.gui.WidgetType;
 import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
+import org.spoutcraft.client.packet.CustomPacket;
 import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.gui.CustomScreen;
 
-public class PacketWidget extends SpoutPacket {
-	protected Widget widget;
-	protected UUID screen;
+public class PacketWidget extends SpoutPacket { // TODO: Review class and update fully for MEBB
+	private Byte widgetData;
+	private WidgetType widgetType;
+	private UUID widgetId;
+	private int version;
+	private Widget widget;
+	private UUID screen;
+
+	protected final static Map<UUID, Widget> ALL_WIDGETS = new HashMap<>();
 
 	protected PacketWidget() {
 	}
@@ -84,10 +92,10 @@ public class PacketWidget extends SpoutPacket {
 	@Override
 	public void handle(SpoutPlayer player) {
 		try {
-			if (allWidgets.containsKey(widgetId)) {
-				widget = allWidgets.get(widgetId);
+			if (ALL_WIDGETS.containsKey(widgetId)) {
+				widget = ALL_WIDGETS.get(widgetId);
 				if (widget.getVersion() == version) {
-					widget.readData(new SpoutInputStream(widgetData));
+					widget.decode(new MinecraftExpandableByteBuffer(widgetData));
 				}
 			} else {
 				widget = widgetType.getWidgetClass().newInstance();
@@ -95,11 +103,8 @@ public class PacketWidget extends SpoutPacket {
 				// Hackish way to set the ID without a setter
 				((GenericWidget) widget).setId(widgetId);
 				if (widget.getVersion() == version) {
-					widget.readData(new SpoutInputStream(widgetData));
+					widget.decode(new MinecraftExpandableByteBuffer(widgetData));
 				} else {
-					if (nags[widgetType.getId()]-- > 0) {
-						System.out.println("Received invalid widget: " + widgetType.getWidgetClass().getSimpleName() + " v: " + version + " current v: " + widget.getVersion());
-					}
 					widget = null;
 				}
 			}
@@ -107,7 +112,7 @@ public class PacketWidget extends SpoutPacket {
 			e.printStackTrace();
 		}
 		if (widget != null) {
-			allWidgets.put(widgetId, widget);
+			ALL_WIDGETS.put(widgetId, widget);
 			InGameHUD mainScreen = SpoutClient.getInstance().getActivePlayer().getMainScreen();
 			PopupScreen popup = mainScreen.getActivePopup();
 			Screen overlay = null;
@@ -120,7 +125,7 @@ public class PacketWidget extends SpoutPacket {
 				if (popup != null) {
 					if (widget.getId().equals(popup.getId())) {
 						if (SpoutClient.getHandle().currentScreen instanceof CustomScreen) {
-							((CustomScreen)SpoutClient.getHandle().currentScreen).update((PopupScreen)widget);
+							(SpoutClient.getHandle().currentScreen).update((PopupScreen)widget);
 						}
 					} else {
 						mainScreen.closePopup();

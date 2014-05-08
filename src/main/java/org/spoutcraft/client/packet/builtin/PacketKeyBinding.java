@@ -46,20 +46,21 @@ public class PacketKeyBinding extends SpoutPacket {
 
 	@Override
 	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
-		id = buf.getInt();
+		id = buf.getUTF8();
 		description = buf.getUTF8();
 		plugin = buf.getUTF8();
 		key = buf.getInt();
-        uniqueId = buf.getUUID();
+		uniqueId = buf.getUUID(); // TODO: Server-side version of this packet needs to send the UUID, not Long.
 	}
 
 	@Override
 	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
 		buf.putInt(key);
 		buf.putBoolean(pressed);
-		buf.putUUID(uniqueId);
+		buf.putUUID(uniqueId); // TODO: Server-side version of this packet needs to receive UUID, not Long.
 	}
 
+	@Override
 	public void handle(SpoutPlayer player) {
 		KeyBinding binding = new KeyBinding(key, plugin, id, description);
 		binding.setUniqueId(uniqueId);

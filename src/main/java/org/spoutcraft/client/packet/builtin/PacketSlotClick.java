@@ -43,24 +43,22 @@ public class PacketSlotClick extends SpoutPacket {
 	}
 
 	@Override
-	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException { // TODO: Review this
 		long msb = buf.getLong();
 		long lsb = buf.getLong();
 		screen = new UUID(msb, lsb);
 		msb = buf.getLong();
 		lsb = buf.getLong();
 		slot = new UUID(msb, lsb);
-		button = buf.getInt();
 		holdingShift = buf.getBoolean();
 	}
 
 	@Override
-	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException { // TODO: Review thi
 		buf.putLong(screen.getMostSignificantBits());
 		buf.putLong(screen.getLeastSignificantBits()); // 16
 		buf.putLong(slot.getMostSignificantBits());
 		buf.putLong(slot.getLeastSignificantBits()); // 32
-		buf.putInt(button); // mouseClick will usually be 0 (left) or 1 (right) - so this is safe unless the mouse has... 257 buttons :P
 		buf.putBoolean(holdingShift);//34
 	}
 	

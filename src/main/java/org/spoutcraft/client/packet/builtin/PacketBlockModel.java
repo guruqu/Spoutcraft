@@ -48,22 +48,17 @@ public class PacketBlockModel extends SpoutPacket {
 		data = buf.get();
 		design = new GenericBlockDesign();
 		design.decode(buf);
-		if (design.getReset()) {
+		if (design.isReset()) {
 			design = null;
 		}
 	}
 
 	@Override
 	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
-		buf.putShort(customId);
-		buf.put(data);
-		if (design != null) {
-			design.encode(buf);
-		} else {
-			buf.putUTF8(GenericBlockDesign.RESET_STRING);
-		}
+		throw new IOException("The client should not send a PacketBlockModel to the server (hack?)!");
 	}
 
+	@Override
 	public void handle(SpoutPlayer player) {
 		CustomBlock block = MaterialData.getCustomBlock(customId);
 		if (block != null) {

@@ -52,6 +52,7 @@ public class PacketChangeMusic extends SpoutPacket {
 		buf.putBoolean(cancel);
 	}
 
+	@Override
 	public void handle(SpoutPlayer player) {
 		if (cancel) {
 			SpoutClient.getHandle().sndManager.cancelled = true;

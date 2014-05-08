@@ -31,9 +31,9 @@ import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
 public class PacketWidgetRemove extends SpoutPacket {	
-	protected UUID widget;
+	private UUID widget;
 
-	public PacketWidgetRemove() {
+	protected PacketWidgetRemove() {
 	}
 
 	public PacketWidgetRemove(Widget widget, UUID screen) {
@@ -52,7 +52,7 @@ public class PacketWidgetRemove extends SpoutPacket {
 		InGameHUD mainScreen = SpoutClient.getInstance().getActivePlayer().getMainScreen();
 		PopupScreen popup = mainScreen.getActivePopup();
 
-		Widget w = PacketWidget.allWidgets.get(widget);
+		Widget w = PacketWidget.ALL_WIDGETS.get(widget);
 
 		if (w != null && w.getScreen() != null && !(w instanceof Screen)) {
 			w.getScreen().removeWidget(w);
@@ -63,6 +63,6 @@ public class PacketWidgetRemove extends SpoutPacket {
 			mainScreen.closePopup();
 		}
 
-		PacketWidget.allWidgets.remove(widget);
+		PacketWidget.ALL_WIDGETS.remove(widget);
 	}	
 }

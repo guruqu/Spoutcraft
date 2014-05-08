@@ -27,11 +27,11 @@ import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.player.SpoutPlayer;
 
 public class PacketMovementModifiers extends SpoutPacket {
-	double gravityMod = 1;
-	double walkingMod = 1;
-	double swimmingMod = 1;
-	double jumpingMod = 1;
-	double airspeedMod = 1;
+	private double gravityMod = 1;
+	private double walkingMod = 1;
+	private double swimmingMod = 1;
+	private double jumpingMod = 1;
+	private double airspeedMod = 1;
 
 	protected PacketMovementModifiers() {
 	}
@@ -62,7 +62,8 @@ public class PacketMovementModifiers extends SpoutPacket {
 		buf.putDouble(airspeedMod);
 	}
 
-	public void handle(SpoutPlayer player) {		
+	@Override
+	public void handle(SpoutPlayer player) {
 		Minecraft.getMinecraft().thePlayer.getData().setGravityMod(gravityMod);
 		Minecraft.getMinecraft().thePlayer.getData().setWalkingMod(walkingMod);
 		Minecraft.getMinecraft().thePlayer.getData().setSwimmingMod(swimmingMod);

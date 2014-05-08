@@ -28,10 +28,10 @@ import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.player.SpoutPlayer;
 
 public class PacketKeyPress extends SpoutPacket {
-	public boolean pressDown;
-	public int key;
-	public byte settingKeys[] = new byte[10];
-	public int screenType = -1;
+	private boolean pressDown;
+	private int key;
+	private byte settingKeys[] = new byte[10];
+	private int screenType = -1;
 
 	protected PacketKeyPress() {
 	}
@@ -94,5 +94,6 @@ public class PacketKeyPress extends SpoutPacket {
 
 	@Override
 	public void handle(SpoutPlayer player) {
-	}	
+		// Nothing to do
+	}
 }

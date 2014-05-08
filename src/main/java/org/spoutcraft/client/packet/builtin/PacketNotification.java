@@ -26,16 +26,22 @@ import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
 public class PacketNotification extends PacketShowAchievement {
-	private int time;
+	private String title;
+	private String message;
+	private int itemId;
 	private short data;
+	private int time;
 
 	protected PacketNotification() {
 	}
 
 	public PacketNotification(String title, String message, int itemId, short data, int time) {
 		super(title, message, itemId);
-		this.time = time;
+		this.title = title;
+		this.message = message;
+		this.itemId = itemId;
 		this.data = data;
+		this.time = time;
 	}
 
 	@Override
@@ -55,5 +61,5 @@ public class PacketNotification extends PacketShowAchievement {
 	@Override
 	public void handle(SpoutPlayer player) {
 		SpoutClient.getInstance().getActivePlayer().showAchievement(title, message, itemId, data, time);
-	}	
+	}
 }

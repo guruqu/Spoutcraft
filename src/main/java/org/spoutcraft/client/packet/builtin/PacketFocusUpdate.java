@@ -30,12 +30,12 @@ import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.SpoutClient;
 
-public class PacketFocusUpdate implements SpoutPacket {
+public class PacketFocusUpdate extends SpoutPacket {
 	private Control control;
 	private boolean focus;
 	private UUID widgetId;
 
-	public PacketFocusUpdate() {
+	protected PacketFocusUpdate() {
 	}
 
 	public PacketFocusUpdate(Control control, boolean focus) {
@@ -56,7 +56,7 @@ public class PacketFocusUpdate implements SpoutPacket {
 	}
 
 	@Override
-	public void run(int playerId) {
+	public void handle(SpoutPlayer player) {
 		InGameHUD screen = SpoutClient.getInstance().getActivePlayer().getMainScreen();
 		PopupScreen popup = screen.getActivePopup();
 		if (popup != null) {

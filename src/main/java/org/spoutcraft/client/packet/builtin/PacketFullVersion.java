@@ -31,17 +31,17 @@ public class PacketFullVersion extends SpoutPacket {
 	}
 
 	public PacketFullVersion(String versionString) {
-		this.versionString = versionString;
+		this.version = versionString;
 	}
 
 	@Override
 	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
-		versionString = buf.getUTF8();
+		version = buf.getUTF8();
 	}
 
 	@Override
 	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
-		buf.putUTF8(versionString);
+		buf.putUTF8(version);
 	}
 
 	@Override

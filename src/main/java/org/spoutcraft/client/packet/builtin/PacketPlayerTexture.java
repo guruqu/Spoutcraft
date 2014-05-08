@@ -26,10 +26,10 @@ import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.player.SpoutPlayer;
 
 public class PacketPlayerTexture extends SpoutPacket {
-	public int entityId;
-	public String skinURL;
-	public String cloakURL;
-	public boolean release = true;
+	private int entityId;
+	private String skinURL;
+	private String cloakURL;
+	private boolean release = true;
 
 	protected PacketPlayerTexture() {
 	}
@@ -69,6 +69,7 @@ public class PacketPlayerTexture extends SpoutPacket {
 		buf.putBoolean(release);
 	}
 
+	@Override
 	public void handle(SpoutPlayer player) {
 		// Check if these are the Minecraft skin/cape, if so, use defaults instead
 		String mcSkin = "http://s3.amazonaws.com/MinecraftSkins/" + player.getName() + ".png";

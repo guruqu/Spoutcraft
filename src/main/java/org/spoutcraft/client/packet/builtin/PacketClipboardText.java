@@ -26,7 +26,7 @@ import org.spoutcraft.client.player.SpoutPlayer;
 
 public class PacketClipboardText extends SpoutPacket {
 	private String text;
-	
+
 	protected PacketClipboardText() {
 	}
 
@@ -43,6 +43,7 @@ public class PacketClipboardText extends SpoutPacket {
 		buf.putUTF8(text);
 	}
 
+	@Override
 	public void handle(SpoutPlayer player) {
 		// Possibility of setting client side clipboard via GuiScreen.setClipboard(text).
 	}

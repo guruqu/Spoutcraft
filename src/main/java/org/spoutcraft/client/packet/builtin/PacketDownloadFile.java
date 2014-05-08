@@ -37,7 +37,7 @@ import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.io.CustomTextureManager;
 import org.spoutcraft.client.io.FileUtil;
 
-public class PacketDownloadFile implements CompressiblePacket {
+public class PacketDownloadFile extends CompressiblePacket {
 	private String plugin;
 	private byte[] fileData;
 	private String fileName;
@@ -63,14 +63,14 @@ public class PacketDownloadFile implements CompressiblePacket {
 		compressed = buf.getBoolean();
 		int size = buf.getInt();
 		this.fileData = new byte[size];
-		buf.get(fileData);		
+		buf.get(fileData);
 	}
 
 	@Override
 	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
 		throw new IOException("The server should not receive a PacketDownloadFile from the client (hack?)!");
 	}
-	
+
 	@Override
 	public void compress() {
 		if (!compressed) {
@@ -124,6 +124,7 @@ public class PacketDownloadFile implements CompressiblePacket {
 		return compressed;
 	}
 
+	@Override
 	public void handle(SpoutPlayer player) {
 		this.fileName = FileUtil.getFileName(this.fileName);
 		if (!FileUtil.canCache(fileName)) {
@@ -143,6 +144,6 @@ public class PacketDownloadFile implements CompressiblePacket {
 		if (cache.exists() && FileUtil.isImageFile(fileName)) {
 			CustomTextureManager.getTextureFromUrl(plugin, fileName);
 		}
-		((EntityClientPlayerMP)Minecraft.getMinecraft().thePlayer).sendQueue.addToSendQueue(new Packet0KeepAlive());
-	}	
+		(Minecraft.getMinecraft().thePlayer).sendQueue.addToSendQueue(new Packet0KeepAlive());
+	}
 }

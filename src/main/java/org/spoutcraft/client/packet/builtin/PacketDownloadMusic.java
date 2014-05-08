@@ -31,17 +31,17 @@ import org.spoutcraft.client.io.FileUtil;
 import org.spoutcraft.client.sound.QueuedSound;
 
 public class PacketDownloadMusic extends SpoutPacket {
-	int x, y, z;
-	int volume, distance;
-	boolean soundEffect, notify;	
-	String url, plugin;
+	private int x, y, z;
+	private int volume, distance;
+	private boolean soundEffect, notify;
+	private String url, plugin;
 
-	public PacketDownloadMusic() {
+	protected PacketDownloadMusic() {
 	}
 
 	public PacketDownloadMusic(String plugin, String URL, Location loc, int distance, int volume, boolean soundEffect, boolean notify) {
 		this.plugin = plugin;
-		this.URL = URL;
+		this.url = URL;
 		this.volume = volume;
 		this.soundEffect = soundEffect;
 		this.notify = notify;
@@ -57,7 +57,7 @@ public class PacketDownloadMusic extends SpoutPacket {
 
 	@Override
 	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
-		URL = buf.getUTF8();
+		url = buf.getUTF8();
 		plugin = buf.getUTF8();
 		distance = buf.getInt();
 		x = buf.getInt();
@@ -70,7 +70,7 @@ public class PacketDownloadMusic extends SpoutPacket {
 
 	@Override
 	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
-		buf.putUTF8(URL);
+		buf.putUTF8(url);
 		buf.putUTF8(plugin);
 		buf.putInt(distance);
 		buf.putInt(x);
@@ -81,8 +81,7 @@ public class PacketDownloadMusic extends SpoutPacket {
 		buf.putBoolean(notify);
 	}
 
-
-
+	@Override
 	public void handle(SpoutPlayer player) {
 		File directory = new File(FileUtil.getTempDir(), plugin);
 		if (!directory.exists()) {
@@ -109,5 +108,5 @@ public class PacketDownloadMusic extends SpoutPacket {
 			SpoutClient.getInstance().getActivePlayer().showAchievement("Downloading Music...", fileName, 2256 /*Gold Record*/);
 		}
 		FileDownloadThread.getInstance().addToDownloadQueue(download);
-	}	
+	}
 }

@@ -165,13 +165,13 @@ class LightingThread extends Thread {
 	final LinkedBlockingQueue<LightingData> queue = new LinkedBlockingQueue<LightingData>();
 	final int[] lightingBlockList = new int[32768 * 4];
 
-	LightingThread() {
+	protected LightingThread() {
 		super("Lighting Thread");
 		setDaemon(true);
 	}
 
 	@Override
-	public void run() {
+	public void handle(SpoutPlayer player) {
 		while (!this.isInterrupted()) {
 			try {
 				LightingData data = queue.take();

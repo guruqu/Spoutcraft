@@ -22,18 +22,18 @@ package org.spoutcraft.client.packet.builtin;
 import java.io.IOException;
 
 import org.spoutcraft.api.Spoutcraft;
-import org.spoutcraft.api.io.SpoutInputStream;
-import org.spoutcraft.api.io.SpoutOutputStream;
+import org.spoutcraft.api.io.MinecraftExpandableByteBuffer;
 import org.spoutcraft.client.SpoutClient;
+import org.spoutcraft.client.player.SpoutPlayer;
 
-public class PacketCustomBlockOverride implements SpoutPacket {
+public class PacketCustomBlockOverride extends SpoutPacket {
 	private int x;
 	private short y;
 	private int z;
 	private short blockId;
 	private byte data;
 
-	public PacketCustomBlockOverride() {
+	protected PacketCustomBlockOverride() {
 	}
 
 	public PacketCustomBlockOverride(int x, int y, int z, Integer blockId, Byte data) {
@@ -53,50 +53,46 @@ public class PacketCustomBlockOverride implements SpoutPacket {
 	}
 
 	protected Integer getBlockId() {
-		return blockId == -1 ? null : Integer.valueOf(blockId);
+		return blockId == -1 ? null : (int) blockId;
 	}
 
 	private void setBlockData(Byte data) {
 		if (data == null) {
 			this.data = -1;
 		} else {
-			this.data = data.byteValue();
+			this.data = data;
 		}
 	}
 
 	protected Byte getBlockDatas() {
-		return data == -1 ? null : Byte.valueOf(data);
+		return data == -1 ? null : data;
 	}
 
-	public void readData(SpoutInputStream input) throws IOException {
-		x = input.readInt();
-		y = input.readShort();
-		z = input.readInt();
-		setBlockId((int)input.readShort());
-		setBlockData((byte) input.read());
+	@Override
+	public void decode(MinecraftExpandableByteBuffer buf) throws IOException {
+		x = buf.getInt();
+		y = buf.getShort();
+		z = buf.getInt();
+		setBlockId((int) buf.getShort());
+		setBlockData(buf.get());
 	}
 
-	public void writeData(SpoutOutputStream output) throws IOException {
-		output.writeInt(x);
-		output.writeShort(y);
-		output.writeInt(z);
-		output.writeShort(blockId);
-		output.write(data);
+	@Override
+	public void encode(MinecraftExpandableByteBuffer buf) throws IOException {
+		buf.putInt(x);
+		buf.putShort(y);
+		buf.putInt(z);
+		buf.putShort(blockId);
+		buf.put(data);
 	}
 
-	public void run(int PlayerId) {
+	@Override
+	public void handle(SpoutPlayer player) {
 		Spoutcraft.getChunkAt(SpoutClient.getInstance().getRawWorld(), x, y, z).setCustomBlockId(x, y, z, blockId);
 		Spoutcraft.getChunkAt(SpoutClient.getInstance().getRawWorld(), x, y, z).setCustomBlockData(x, y, z, data);
 	}
 
-	public PacketType getPacketType() {
-		return PacketType.PacketCustomBlockOverride;
-	}
-
 	public int getVersion() {
-		return 3;
-	}
-
-	public void failure(int playerId) {
+		return 0;
 	}
 }

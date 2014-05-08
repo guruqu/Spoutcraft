@@ -43,5 +43,5 @@ public class PacketRequestPrecache extends SpoutPacket {
 	@Override
 	public void handle(SpoutPlayer player) {
 		// Nothing to do.
-	}	
+	}
 }

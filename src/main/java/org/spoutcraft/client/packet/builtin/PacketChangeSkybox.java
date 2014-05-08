@@ -30,8 +30,8 @@ import org.spoutcraft.client.SpoutClient;
 public class PacketChangeSkybox extends SpoutPacket {
 	private int cloudY, stars, sunPercent, moonPercent;
 	private Color skyColor, fogColor, cloudColor;
-	String sun = "";
-	String moon = "";
+	private String sun = "";
+	private String moon = "";
 
 	protected PacketChangeSkybox() {
 	}
@@ -79,6 +79,7 @@ public class PacketChangeSkybox extends SpoutPacket {
 		buf.putColor(cloudColor);
 	}
 
+	@Override
 	public void handle(SpoutPlayer player) {
 		if (cloudY != 0) {
 			SpoutClient.getInstance().getSkyManager().setCloudHeight(cloudY);
