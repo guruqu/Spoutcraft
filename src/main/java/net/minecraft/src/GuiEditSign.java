@@ -10,7 +10,8 @@ import org.spoutcraft.api.Spoutcraft;
 public class GuiEditSign extends GuiScreen {
 
 	/**
-	 * This String is just a local copy of the characters allowed in text rendering of minecraft.
+	 * This String is just a local copy of the characters allowed in text
+	 * rendering of minecraft.
 	 */
 	private static final String allowedCharacters = ChatAllowedCharacters.allowedCharacters;
 
@@ -25,12 +26,13 @@ public class GuiEditSign extends GuiScreen {
 
 	/** The number of the line that is being edited. */
 	private int editLine;
-	
+
 	/** "Done" button for the GUI. */
 	private GuiButton doneBtn;
 
 	// Spout Start
 	private int editColumn;
+
 	// Spout End
 
 	public GuiEditSign(TileEntitySign par1TileEntitySign) {
@@ -43,12 +45,14 @@ public class GuiEditSign extends GuiScreen {
 	public void initGui() {
 		this.buttonList.clear();
 		Keyboard.enableRepeatEvents(true);
-		this.buttonList.add(this.doneBtn = new GuiButton(0, this.width / 2 - 100, this.height / 4 + 120, "Done"));
+		this.buttonList.add(this.doneBtn = new GuiButton(0,
+				this.width / 2 - 100, this.height / 4 + 120, "Done"));
 		this.entitySign.setEditable(false);
 	}
 
 	/**
-	 * Called when the screen is unloaded. Used to disable keyboard repeat events
+	 * Called when the screen is unloaded. Used to disable keyboard repeat
+	 * events
 	 */
 	public void onGuiClosed() {
 		// Spout Start
@@ -59,7 +63,8 @@ public class GuiEditSign extends GuiScreen {
 		if (sendAsUnicode()) {
 			for (int i = 0; i < entitySign.signText.length; i++) {
 				if (entitySign.signText[i] != null)
-					entitySign.signText[i] = entitySign.signText[i].replaceAll("(&([a-fA-F0-9]))", "\u00A7$2");
+					entitySign.signText[i] = entitySign.signText[i].replaceAll(
+							"(&([a-fA-F0-9]))", "\u00A7$2");
 			}
 		}
 		// Spout End
@@ -67,7 +72,9 @@ public class GuiEditSign extends GuiScreen {
 		NetClientHandler var1 = this.mc.getNetHandler();
 
 		if (var1 != null) {
-			var1.addToSendQueue(new Packet130UpdateSign(this.entitySign.xCoord, this.entitySign.yCoord, this.entitySign.zCoord, this.entitySign.signText));
+			var1.addToSendQueue(new Packet130UpdateSign(this.entitySign.xCoord,
+					this.entitySign.yCoord, this.entitySign.zCoord,
+					this.entitySign.signText));
 		}
 
 		this.entitySign.setEditable(true);
@@ -81,7 +88,8 @@ public class GuiEditSign extends GuiScreen {
 	}
 
 	/**
-	 * Fired when a control is clicked. This is the equivalent of ActionListener.actionPerformed(ActionEvent e).
+	 * Fired when a control is clicked. This is the equivalent of
+	 * ActionListener.actionPerformed(ActionEvent e).
 	 */
 	protected void actionPerformed(GuiButton par1GuiButton) {
 		if (par1GuiButton.enabled) {
@@ -89,18 +97,20 @@ public class GuiEditSign extends GuiScreen {
 				// Spout Start
 				if (!Spoutcraft.hasPermission("spout.plugin.signcolors")) {
 					for (int i = 0; i < entitySign.signText.length; i++) {
-						entitySign.signText[i] = ChatColor.stripColor(entitySign.signText[i]);
+						entitySign.signText[i] = ChatColor
+								.stripColor(entitySign.signText[i]);
 					}
 				}
 				// Spout End
 				this.entitySign.onInventoryChanged();
-				this.mc.displayGuiScreen((GuiScreen)null);
+				this.mc.displayGuiScreen((GuiScreen) null);
 			}
 		}
 	}
 
 	/**
-	 * Fired when a key is typed. This is the equivalent of KeyListener.keyTyped(KeyEvent e).
+	 * Fired when a key is typed. This is the equivalent of
+	 * KeyListener.keyTyped(KeyEvent e).
 	 */
 	// Spout Start - Rewritten Method
 	protected void keyTyped(char par1, int par2) {
@@ -151,7 +161,8 @@ public class GuiEditSign extends GuiScreen {
 			}
 		}
 
-		if ((allowedCharacters.indexOf(par1) > -1 || par1 > 32) && this.entitySign.signText[this.editLine].length() < 15) { // Enter
+		if (ChatAllowedCharacters.isAllowedCharacter(par1)
+				&& this.entitySign.signText[this.editLine].length() < 15) { // Enter
 			String line = entitySign.signText[editLine];
 
 			// Prevent out of bounds on the substring call
@@ -183,10 +194,11 @@ public class GuiEditSign extends GuiScreen {
 				line = before + after;
 				entitySign.signText[editLine] = line;
 			}
-		}		
+		}
 
 		entitySign.recalculateText();
 	}
+
 	// Spout End
 
 	/**
@@ -194,16 +206,17 @@ public class GuiEditSign extends GuiScreen {
 	 */
 	public void drawScreen(int par1, int par2, float par3) {
 		this.drawDefaultBackground();
-		this.drawCenteredString(this.fontRenderer, this.screenTitle, this.width / 2, 40, 16777215);
+		this.drawCenteredString(this.fontRenderer, this.screenTitle,
+				this.width / 2, 40, 16777215);
 		GL11.glPushMatrix();
-		GL11.glTranslatef((float)(this.width / 2), 0.0F, 50.0F);
+		GL11.glTranslatef((float) (this.width / 2), 0.0F, 50.0F);
 		float var4 = 93.75F;
 		GL11.glScalef(-var4, -var4, -var4);
 		GL11.glRotatef(180.0F, 0.0F, 1.0F, 0.0F);
 		Block var5 = this.entitySign.getBlockType();
 
 		if (var5 == Block.signPost) {
-			float var6 = (float)(this.entitySign.getBlockMetadata() * 360) / 16.0F;
+			float var6 = (float) (this.entitySign.getBlockMetadata() * 360) / 16.0F;
 			GL11.glRotatef(var6, 0.0F, 1.0F, 0.0F);
 			GL11.glTranslatef(0.0F, -1.0625F, 0.0F);
 		} else {
@@ -227,13 +240,14 @@ public class GuiEditSign extends GuiScreen {
 		}
 
 		// Spout Start
-		//if(this.updateCounter / 6 % 2 == 0) {
+		// if(this.updateCounter / 6 % 2 == 0) {
 		this.entitySign.lineBeingEdited = this.editLine;
 		entitySign.columnBeingEdited = editColumn;
-		//}
+		// }
 		// Spout End
 
-		TileEntityRenderer.instance.renderTileEntityAt(this.entitySign, -0.5D, -0.75D, -0.5D, 0.0F);
+		TileEntityRenderer.instance.renderTileEntityAt(this.entitySign, -0.5D,
+				-0.75D, -0.5D, 0.0F);
 		this.entitySign.lineBeingEdited = -1;
 		// Spout Start
 		entitySign.columnBeingEdited = -1;
