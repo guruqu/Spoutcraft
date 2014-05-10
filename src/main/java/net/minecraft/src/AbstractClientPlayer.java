@@ -17,6 +17,7 @@ public abstract class AbstractClientPlayer extends EntityPlayer {
 	private ResourceLocation locationCape;
 	public String customCapeUrl;
 	public String customSkinUrl;
+	public static boolean forceUpdate = false;
 	
 	public AbstractClientPlayer(World par1World, String par2Str) {
 		super(par1World, par2Str);
@@ -62,10 +63,11 @@ public abstract class AbstractClientPlayer extends EntityPlayer {
 
 	private static ThreadDownloadImageData getDownloadImage(ResourceLocation par0ResourceLocation, String par1Str, ResourceLocation par2ResourceLocation, IImageBuffer par3IImageBuffer) {
 		TextureManager var4 = Minecraft.getMinecraft().getTextureManager();
-		Object var5 = var4.getTexture(par0ResourceLocation); // Spout Removed -> Don't cache skin image objects.
-		
-		if (!(Minecraft.getMinecraft().currentScreen instanceof GuiDownloadTerrain)) {
+		Object var5 = var4.getTexture(par0ResourceLocation);
+
+		if (forceUpdate){
 			var5 = null;
+			forceUpdate = false;
 		}
 		
 		if (var5 == null) {		
