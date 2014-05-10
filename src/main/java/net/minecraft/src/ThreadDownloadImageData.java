@@ -2,6 +2,10 @@ package net.minecraft.src;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.logging.Logger;
 
 import org.spoutcraft.client.HDImageBufferDownload;
 
@@ -12,6 +16,13 @@ public class ThreadDownloadImageData extends AbstractTexture {
 	private Thread imageThread;
 	private SimpleTexture imageLocation;
 	private boolean textureUploaded;
+	
+	private static ThreadPoolExecutor executor;
+	
+	static{
+		// Initialize threaded resource loader
+		executor = (ThreadPoolExecutor)Executors.newFixedThreadPool(50);
+	}
 
 	public ThreadDownloadImageData(String par1Str, ResourceLocation par2ResourceLocation, IImageBuffer par3IImageBuffer) {
 		this.imageUrl = par1Str;
@@ -50,7 +61,10 @@ public class ThreadDownloadImageData extends AbstractTexture {
 			this.imageThread = new ThreadDownloadImageDataINNER1(this);
 			this.imageThread.setDaemon(true);
 			this.imageThread.setName("Skin downloader: " + this.imageUrl);
-			this.imageThread.start();
+			//this.imageThread.start();
+
+			System.err.println("New Url job (Qlen="+executor.getActiveCount()+"/"+executor.getQueue().size()+"): "+this.imageUrl);
+			executor.execute(this.imageThread);
 		}
 	}
 
